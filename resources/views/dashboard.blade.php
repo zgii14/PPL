@@ -1,17 +1,34 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
+@section('title')
+    lorem
+@endsection
+
+@section('content')
+    <section class="section">
+        <div class="section-header">
+            <h1>Dashboard</h1>
+            <div class="section-header-breadcrumb">
+                <div class="breadcrumb-item active">Dashboard</div>
+            </div>
+        </div>
+        <div class="section-body">
+            <h2 class="section-title">Hello world</h2>
+            <p class="section-lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis et velit recusandae ea
+                incidunt non quo quod culpa vel voluptatem commodi enim aspernatur quis libero distinctio, voluptatibus
+                beatae iure accusamus!</p>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Hello world</h4>
+                        </div>
+                        <div class="card-body p-5">
+                            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Veritatis aliquam eos cum, provident porro veniam officiis atque nisi aut commodi iure incidunt nobis nihil sapiente similique sequi cumque nostrum architecto?
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</x-app-layout>
+    </section>
+@endsection
