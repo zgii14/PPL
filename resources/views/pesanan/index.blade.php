@@ -92,9 +92,10 @@
                                                             <option value="4"
                                                                 {{ $item->status == 4 ? "selected" : "" }}>Lipat</option>
                                                             <option value="5"
-                                                                {{ $item->status == 5 ? "selected" : "" }}>Selesai</option>
+                                                                {{ $item->status == 5 ? "selected" : "" }}>Pengantaran
+                                                            </option>
                                                             <option value="6"
-                                                                {{ $item->status == 6 ? "selected" : "" }}>Pengantaran
+                                                                {{ $item->status == 6 ? "selected" : "" }}>Selesai
                                                             </option>
                                                         </select>
                                                     </form>

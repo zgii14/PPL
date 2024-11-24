@@ -20,6 +20,11 @@ class Pesanan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function pembayaran(){
+        return $this->hasOne(Pembayaran::class);
+    }
+
     public function getStatusLabelAttribute()
 {
     $statuses = [
@@ -27,9 +32,9 @@ class Pesanan extends Model
         2 => 'Cuci',
         3 => 'Kering',
         4 => 'Lipat',
-        5 => 'Selesai',
-        6 => 'Pengantaran',
-
+        5 => 'Pengantaran',
+        6 => 'Selesai',
+        
     ];
 
     return $statuses[$this->status] ?? 'Unknown';

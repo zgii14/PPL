@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('total_harga'); // Total harga pesanan
 
             // Status tahapan proses laundry (1: Cuci, 2: Kering, 3: Strika, 4: Siap, 5: Selesai)
-            $table->tinyInteger('status')->default(1)->comment('1: Penjemputan, 2: Cuci , 3: Kering, 4: Lipat, 5: Selesai, 6: Pengantaran');
+            $table->tinyInteger('status')->default(1)->comment('1: Penjemputan, 2: Cuci , 3: Kering, 4: Lipat, 5: Pengantaran, 6: Selesai');
 
             $table->timestamps(); // created_at dan updated_at
         });
