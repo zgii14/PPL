@@ -109,3 +109,12 @@ Route::resource('pesanan', PesananController::class);
 Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
 
 });
+
+// In routes/web.php
+// In routes/web.php
+
+// Route to show payment confirmation form
+Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPaymentForm'])->name('pesanan.acc_payment');
+
+// Route to process the payment and update status
+Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');

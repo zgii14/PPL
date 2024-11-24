@@ -57,6 +57,7 @@
                                             <th class="p-1 text-center">TOTAL HARGA</th>
                                             <th class="p-1 text-center">TANGGAL PEMESANAN</th>
                                             <th class="p-1 text-center">STATUS</th>
+                                            <th class="p-1 text-center">PEMBAYARAN</th>
                                             <th class="p-1 text-center">AKSI</th>
                                         </tr>
                                     </thead>
@@ -100,6 +101,9 @@
                                                         </select>
                                                     </form>
                                                 </td>
+                                                <td>
+                                                    {{ $item->pembayaran ? $item->pembayaran->status : "Belum Dibayar" }}
+                                                </td>
                                                 <td class="text-center">
                                                     <a href="{{ route("pesanan.show", $item->id) }}"
                                                         class="btn btn-info btn-sm mx-1">
@@ -117,7 +121,15 @@
                                                             <i class="fas fa-trash"></i> Hapus
                                                         </button>
                                                     </form>
+
+                                                    @if ($item->pembayaran ? $item->pembayaran->status != "berhasil" : false)
+                                                        <a href="{{ route("pesanan.acc_payment", $item->id) }}"
+                                                            class="btn btn-success btn-sm mx-1">
+                                                            <i class="fas fa-check"></i> Konfirmasi Pembayaran
+                                                        </a>
+                                                    @endif
                                                 </td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>
