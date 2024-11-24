@@ -7,61 +7,100 @@ use Illuminate\Http\Request;
 
 class PaketLaundryController extends Controller
 {
-    // Display list of all packages
-    public function index()
+    // Menampilkan daftar paket laundry
+    public function index(Request $request)
     {
-        $paket = PaketLaundry::paginate(10);
-        return view('paket-laundry.index', compact('paket'));
+        $query = PaketLaundry::query(); // Membuat query builder
+    
+        // Cek jika ada parameter pencarian dan tidak kosong
+        if ($request->has('search') && !empty($request->search)) {
+            // Jika ada pencarian, filter berdasarkan 'nama_paket'
+            $query->where('nama_paket', 'like', '%' . $request->search . '%');
+        }
+    
+        // Paginasikan hasil pencarian atau semua data
+        $paket = $query->paginate(10); // Menampilkan 10 data per halaman
+    
+        return view('paket-laundry.index', compact('paket')); // Kembalikan ke view dengan data paket
     }
+    
 
-    // Show form to create a new package
+    // Menampilkan form untuk membuat paket baru
     public function create()
     {
-        return view('paket-laundry.create');
+        return view('paket-laundry.create'); // Mengembalikan view form untuk tambah paket
     }
 
-    // Store a new package in the database
+    // Menyimpan paket laundry baru ke dalam database
     public function store(Request $request)
     {
+        // Validasi input data
         $request->validate([
-            'nama_paket' => 'required',
+            'nama_paket' => 'required|string|max:255',
             'harga' => 'required|numeric',
-            'jenis' => 'required'
+            'jenis' => 'required|string',
+            'waktu' => 'required|string|max:255', // Menambahkan validasi untuk waktu
+            'deskripsi' => 'nullable|string', // Validasi deskripsi yang bisa kosong
         ]);
 
-        PaketLaundry::create($request->all());
+        // Menyimpan data ke dalam database
+        PaketLaundry::create([
+            'nama_paket' => $request->nama_paket,
+            'harga' => $request->harga,
+            'jenis' => $request->jenis,
+            'waktu' => $request->waktu, // Menyimpan waktu
+            'deskripsi' => $request->deskripsi, // Menyimpan deskripsi
+        ]);
+
+        // Redirect ke halaman daftar paket dengan pesan sukses
         return redirect()->route('paket-laundry.index')->with('success', 'Paket berhasil ditambahkan.');
     }
 
-    // Display details for a specific package
+    // Menampilkan detail paket tertentu
     public function show(PaketLaundry $paketLaundry)
     {
-        return view('paket-laundry.show', compact('paketLaundry'));
+        return view('paket-laundry.show', compact('paketLaundry')); // Mengirim data paket untuk ditampilkan
     }
 
-    // Show form to edit an existing package
+    // Menampilkan form untuk mengedit paket
     public function edit(PaketLaundry $paketLaundry)
     {
-        return view('paket-laundry.edit', compact('paketLaundry'));
+        return view('paket-laundry.edit', compact('paketLaundry')); // Mengembalikan form edit untuk paket
     }
 
-    // Update an existing package in the database
+    // Mengupdate data paket di database
     public function update(Request $request, PaketLaundry $paketLaundry)
     {
+        // Validasi input data
         $request->validate([
-            'nama_paket' => 'required',
+            'nama_paket' => 'required|string|max:255',
             'harga' => 'required|numeric',
-            'jenis' => 'required'
+            'jenis' => 'required|string',
+            'waktu' => 'required|string|max:255', // Menambahkan validasi untuk waktu
+            'deskripsi' => 'nullable|string', // Validasi deskripsi yang bisa kosong
         ]);
 
-        $paketLaundry->update($request->all());
+        // Mengupdate data paket
+        $paketLaundry->update([
+            'nama_paket' => $request->nama_paket,
+            'harga' => $request->harga,
+            'jenis' => $request->jenis,
+            'waktu' => $request->waktu, // Menyimpan waktu
+            'deskripsi' => $request->deskripsi, // Menyimpan deskripsi
+        ]);
+
+        // Redirect ke halaman daftar paket dengan pesan sukses
         return redirect()->route('paket-laundry.index')->with('success', 'Paket berhasil diperbarui.');
     }
 
-    // Delete a package from the database
+    // Menghapus paket dari database
     public function destroy(PaketLaundry $paketLaundry)
     {
+        // Menghapus paket
         $paketLaundry->delete();
+
+        // Redirect ke halaman daftar paket dengan pesan sukses
         return redirect()->route('paket-laundry.index')->with('success', 'Paket berhasil dihapus.');
     }
+    
 }

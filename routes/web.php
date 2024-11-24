@@ -103,4 +103,9 @@ Route::delete('users/{user}', function (App\Models\User $user) {
 
 Route::resource('paket-laundry', PaketLaundryController::class);
 // routes/web.php
+
+Route::middleware(['auth', 'role:staff'])->group(function () {
 Route::resource('pesanan', PesananController::class);
+Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
+
+});

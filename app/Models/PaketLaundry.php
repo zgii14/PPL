@@ -13,9 +13,9 @@ class PaketLaundry extends Model
 
     protected $fillable = [
         'nama_paket',
-        'deskripsi',
+        'deskripsi',  // Pastikan deskripsi ada di sini
         'harga',
-        'jenis'
+        'jenis',
+        'waktu',  // Tambahkan kolom waktu agar bisa disimpan
     ];
 }
-

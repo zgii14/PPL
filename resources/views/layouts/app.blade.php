@@ -8,6 +8,10 @@
             integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
             integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
+        <!-- SweetAlert2 CDN -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.all.min.js"></script>
+
         <!-- Template CSS -->
         <link rel="stylesheet" href="{{ asset("css/style.css") }}" />
         <link rel="stylesheet" href="{{ asset("css/components.css") }}" />
@@ -34,7 +38,7 @@
                                 <img alt="image" src="{{ asset("assets/images/avatar/avatar-1.png") }}"
                                     class="rounded-circle mr-1" />
                                 <div class="d-sm-none d-lg-inline-block">
-                                    Hi,
+                                    Hi,{{ Auth::user()->name }}
                                 </div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
@@ -116,6 +120,43 @@
                     }
                 });
             });
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+
+            // Check for the session success message and show it in a toast
+            @if (session("success"))
+                Toast.fire({
+                    icon: "success",
+                    title: "{{ session("success") }}"
+                });
+            @elseif (session("error"))
+                Toast.fire({
+                    icon: "error",
+                    title: "{{ session("error") }}"
+                });
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    Toast.fire({
+                        icon: "error",
+                        title: "{{ $error }}"
+                    });
+                @endforeach
+            @endif
         </script>
 
         @stack("scripts")

@@ -10,11 +10,14 @@
             </div>
         </div>
 
+        <!-- Button Add New Package -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <a href="{{ route("paket-laundry.create") }}" class="btn btn-primary">Tambah Paket Baru</a>
+                        <a href="{{ route("paket-laundry.create") }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Paket Baru
+                        </a>
                     </div>
                 </div>
             </div>
@@ -32,11 +35,12 @@
                                         <input type="text" name="search" class="form-control"
                                             placeholder="Cari Nama Paket" value="{{ request("search") }}">
                                         <div class="input-group-btn">
-                                            <button class="btn btn-primary">Cari</button>
+                                            <button class="btn btn-primary">
+                                                <i class="fas fa-search"></i> Cari
+                                            </button>
                                         </div>
                                     </div>
                                 </form>
-
                             </div>
                         </div>
 
@@ -45,23 +49,34 @@
                                 <table class="table-striped table-bordered table">
                                     <thead>
                                         <tr>
-                                            <th class="p-1 text-center">No</th> <!-- Serial number header -->
-                                            <th class="p-1 text-center">Nama</th>
-                                            <th class="p-1 text-center">Jenis</th>
-                                            <th class="p-1 text-center">Harga</th>
-                                            <th class="p-1 text-center">Aksi</th>
+                                            <th class="p-1 text-center">NO</th>
+                                            <th class="p-1 text-center">NAMA</th>
+                                            <th class="p-1 text-center">JENIS</th>
+                                            <th class="p-1 text-center">HARGA/KG</th>
+                                            <th class="p-1 text-center">WAKTU</th> <!-- Kolom Waktu dipindah ke depan -->
+                                            <th class="p-1 text-center">DESKRIPSI</th>
+                                            <!-- Kolom Deskripsi dipindah ke belakang -->
+                                            <th class="p-1 text-center">AKSI</th>
                                         </tr>
-
                                     </thead>
                                     <tbody>
                                         @foreach ($paket as $item)
                                             <tr>
                                                 <td class="text-center">
                                                     {{ $loop->iteration + ($paket->currentPage() - 1) * $paket->perPage() }}
-                                                </td> <!-- Serial number -->
+                                                </td>
                                                 <td class="text-center">{{ $item->nama_paket }}</td>
                                                 <td class="text-center">{{ $item->jenis }}</td>
-                                                <td class="text-center">Rp {{ $item->harga }}</td>
+                                                <td class="text-center">Rp {{ number_format($item->harga, 0, ",", ".") }}
+                                                </td>
+                                                <td class="text-center">
+                                                    {{ $item->waktu }} <!-- Menampilkan kolom 'waktu' -->
+                                                </td>
+                                                <td class="text-center">
+                                                    <!-- Limit the description length if it's too long -->
+                                                    {{ Str::limit($item->deskripsi, 30, "...") }}
+                                                    <!-- Menampilkan kolom 'deskripsi' -->
+                                                </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center">
                                                         <a href="{{ route("paket-laundry.show", $item->id) }}"
@@ -80,10 +95,10 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
-
                                 </table>
                             </div>
 
+                            <!-- Pagination -->
                             <div class="d-flex justify-content-center mt-3">
                                 {{ $paket->links() }}
                             </div>
@@ -93,4 +108,28 @@
             </div>
         </div>
     </section>
+
+    <!-- SweetAlert2 Script for Delete Confirmation -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // SweetAlert for Delete confirmation
+        document.querySelectorAll('.delete-alertbox').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form from submitting immediately
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: 'Data yang dihapus tidak dapat dipulihkan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Submit the form if confirmed
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

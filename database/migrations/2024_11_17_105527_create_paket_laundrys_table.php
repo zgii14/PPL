@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('nama_paket');
             $table->text('deskripsi')->nullable();
             $table->integer('harga');
-            $table->string('jenis'); // contoh: 'Standar', 'Ekspres'
+            $table->string('waktu'); // Added waktu column
+            $table->string('jenis'); // example: 'Standar', 'Ekspres'
             $table->timestamps();
         });
-    }    
+    }
+
     /**
      * Reverse the migrations.
      */
@@ -27,5 +29,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('paket_laundry');
     }
-    
 };

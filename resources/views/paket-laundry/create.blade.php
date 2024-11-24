@@ -18,6 +18,7 @@
                                 class="rounded bg-white p-4 shadow">
                                 @csrf
 
+                                <!-- Input Nama Paket -->
                                 <div class="mb-3">
                                     <label for="nama_paket" class="form-label">Nama Paket</label>
                                     <input type="text" name="nama_paket" id="nama_paket" class="form-control" required>
@@ -26,6 +27,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Input Jenis Paket -->
                                 <div class="mb-3">
                                     <label for="jenis" class="form-label">Jenis</label>
                                     <input type="text" name="jenis" id="jenis" class="form-control" required>
@@ -34,6 +36,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Input Deskripsi Paket -->
                                 <div class="mb-3">
                                     <label for="deskripsi" class="form-label">Deskripsi</label>
                                     <textarea name="deskripsi" id="deskripsi" class="form-control"></textarea>
@@ -42,6 +45,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Input Harga Paket -->
                                 <div class="mb-3">
                                     <label for="harga" class="form-label">Harga</label>
                                     <input type="number" name="harga" id="harga" class="form-control" required>
@@ -50,6 +54,16 @@
                                     @enderror
                                 </div>
 
+                                <!-- Input Waktu Paket -->
+                                <div class="mb-3">
+                                    <label for="waktu" class="form-label">Waktu Penyelesaian</label>
+                                    <input type="text" name="waktu" id="waktu" class="form-control" required>
+                                    @error("waktu")
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Tombol Submit dan Batal -->
                                 <button type="submit" class="btn btn-primary">Tambah Paket</button>
                                 <a href="{{ route("paket-laundry.index") }}" class="btn btn-secondary">Batal</a>
                             </form>
