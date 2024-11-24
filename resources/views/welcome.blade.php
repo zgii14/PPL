@@ -1,332 +1,126 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Laundry Lubis</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link
-            href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@400;500&display=swap"
-            rel="stylesheet">
+        <title>Select Location</title>
+
+        <!-- Include Leaflet CSS and JS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+        <!-- Include Leaflet Control Geocoder CSS and JS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+        <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
         <style>
-            /* Global Styles */
-            body {
-                font-family: 'Roboto', sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f7f7f7;
-            }
-
-            h1,
-            h2,
-            h3,
-            p {
-                font-family: 'Open Sans', sans-serif;
-            }
-
-            .container {
-                padding: 0;
-                max-width: 1200px;
-            }
-
-            /* Navbar */
-            .navbar {
-                background-color: #2c3e50;
-                padding: 15px 0;
-            }
-
-            .navbar-brand {
-                font-size: 24px;
-                color: #fff;
-                font-weight: 600;
-            }
-
-            .navbar-nav .nav-link {
-                color: #fff;
-                margin-left: 20px;
-                font-size: 18px;
-                transition: all 0.3s ease;
-            }
-
-            .navbar-nav .nav-link:hover {
-                color: #f39c12;
-            }
-
-            /* Hero Section */
-            .hero {
-                background-image: url('https://via.placeholder.com/1500x800');
-                /* Replace with a good image */
-                background-size: cover;
-                background-position: center;
-                color: #fff;
-                text-align: center;
-                padding: 100px 0;
-            }
-
-            .hero h1 {
-                font-size: 50px;
-                font-weight: 700;
-                margin-bottom: 20px;
-            }
-
-            .hero p {
-                font-size: 20px;
-                margin-bottom: 30px;
-                max-width: 700px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .hero .btn-primary {
-                background-color: #f39c12;
-                border: none;
-                font-size: 18px;
-                padding: 12px 30px;
-                border-radius: 5px;
-                transition: background-color 0.3s ease;
-            }
-
-            .hero .btn-primary:hover {
-                background-color: #e67e22;
-            }
-
-            /* Services Section */
-            .services {
-                background-color: #fff;
-                padding: 60px 0;
-            }
-
-            .services h2 {
-                text-align: center;
-                margin-bottom: 40px;
-                font-size: 36px;
-                font-weight: 600;
-            }
-
-            .services .card {
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                border: none;
-                transition: transform 0.3s ease;
-            }
-
-            .services .card:hover {
-                transform: translateY(-10px);
-            }
-
-            .services .card img {
+            #map {
+                height: 400px;
                 width: 100%;
-                border-radius: 5px;
-            }
-
-            .services .card-body {
-                text-align: center;
-            }
-
-            /* Testimonial Section */
-            .testimonials {
-                background-color: #ecf0f1;
-                padding: 80px 0;
-            }
-
-            .testimonials h2 {
-                text-align: center;
-                margin-bottom: 40px;
-                font-size: 36px;
-                font-weight: 600;
-            }
-
-            .testimonial-card {
-                background-color: #fff;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                padding: 30px;
-                border-radius: 10px;
-                margin: 20px 0;
-                text-align: center;
-                transition: transform 0.3s ease;
-            }
-
-            .testimonial-card:hover {
-                transform: translateY(-10px);
-            }
-
-            .testimonial-card img {
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                margin-bottom: 15px;
-            }
-
-            .testimonial-card p {
-                font-style: italic;
-                color: #7f8c8d;
-            }
-
-            .testimonial-card h3 {
-                font-size: 22px;
-                font-weight: 600;
-                color: #34495e;
-            }
-
-            /* Contact Section */
-            .contact {
-                padding: 60px 0;
-                background-color: #2c3e50;
-                color: #fff;
-            }
-
-            .contact h2 {
-                text-align: center;
-                margin-bottom: 40px;
-                font-size: 36px;
-                font-weight: 600;
-            }
-
-            .contact-form input,
-            .contact-form textarea {
-                width: 100%;
-                padding: 15px;
-                margin: 10px 0;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                font-size: 16px;
-            }
-
-            .contact-form button {
-                background-color: #f39c12;
-                color: #fff;
-                padding: 15px 30px;
-                border: none;
-                border-radius: 5px;
-                font-size: 18px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
-
-            .contact-form button:hover {
-                background-color: #e67e22;
             }
         </style>
     </head>
 
     <body>
 
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">Laundry Lubis</a>
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#services">Layanan</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#testimonials">Testimoni</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Kontak</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <h2>Select Your Location</h2>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="container">
-                <h1>Selamat Datang di Laundry Lubis</h1>
-                <p>Layanan laundry terbaik untuk kebersihan dan kenyamanan pakaian Anda. Mudah, cepat, dan terpercaya.
-                </p>
-                <a href="#contact" class="btn-primary">Hubungi Kami Sekarang</a>
-            </div>
-        </section>
+        <form>
+            @csrf
+            <div id="map"></div>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+            <button type="submit">Save Location</button>
+        </form>
 
-        <!-- Services Section -->
-        <section id="services" class="services">
-            <div class="container">
-                <h2>Layanan Kami</h2>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <img src="https://via.placeholder.com/300" alt="Cuci Kering">
-                            <div class="card-body">
-                                <h5 class="card-title">Cuci Kering</h5>
-                                <p>Cuci kering untuk pakaian Anda yang membutuhkan perawatan lebih hati-hati.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <img src="https://via.placeholder.com/300" alt="Setrika">
-                            <div class="card-body">
-                                <h5 class="card-title">Setrika</h5>
-                                <p>Layanan setrika dengan hasil rapi dan sempurna untuk penampilan yang maksimal.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <img src="https://via.placeholder.com/300" alt="Cuci Sepatu">
-                            <div class="card-body">
-                                <h5 class="card-title">Cuci Sepatu</h5>
-                                <p>Menjaga sepatu Anda tetap bersih dan nyaman dengan layanan cuci sepatu kami.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Display location information -->
+        <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the location
+                information</span></p>
 
-        <!-- Testimonials Section -->
-        <section id="testimonials" class="testimonials">
-            <div class="container">
-                <h2>Apa Kata Pelanggan Kami</h2>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="testimonial-card">
-                            <img src="https://via.placeholder.com/80" alt="Testimonial 1">
-                            <p>"Layanan laundry cepat dan hasilnya sangat memuaskan. Sangat recommended!"</p>
-                            <h3>Andi Susanto</h3>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="testimonial-card">
-                            <img src="https://via.placeholder.com/80" alt="Testimonial 2">
-                            <p>"Laundry Lubis adalah pilihan terbaik untuk perawatan pakaian saya."</p>
-                            <h3>Siti Aisyah</h3>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="testimonial-card">
-                            <img src="https://via.placeholder.com/80" alt="Testimonial 3">
-                            <p>"Saya selalu puas dengan hasil cuci dan setrika di Laundry Lubis!"</p>
-                            <h3>Rudi Firmansyah</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Set the initial position to Bengkulu province
+                const initialPosition = [-3.7889, 102.2655]; // Bengkulu position [latitude, longitude]
 
-        <!-- Contact Section -->
-        <section id="contact" class="contact">
-            <div class="container">
-                <h2>Hubungi Kami</h2>
-                <form class="contact-form">
-                    <input type="text" placeholder="Nama Anda" required>
-                    <input type="email" placeholder="Email Anda" required>
-                    <textarea placeholder="Pesan Anda" required></textarea>
-                    <button type="submit">Kirim Pesan</button>
-                </form>
-            </div>
-        </section>
+                // Initialize Leaflet map
+                const map = L.map('map').setView(initialPosition, 13);
 
-        <!-- Footer -->
-        <footer class="bg-dark py-3 text-center text-white">
-            <p>&copy; 2024 Laundry Lubis | Semua Hak Cipta Dilindungi</p>
-        </footer>
+                // Add ESRI World Imagery tiles for satellite/forest view
+                L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="https://www.esri.com">Esri</a>, Earthstar Geographics'
+                    }).addTo(map);
 
-        <!-- Bootstrap JS and dependencies -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+                // Initialize the geocoder
+                const geocoder = L.Control.Geocoder.nominatim();
+
+                // Create a draggable marker at the initial position
+                const marker = L.marker(initialPosition, {
+                    draggable: true
+                }).addTo(map);
+
+                // Function to update location information using reverse geocoding
+                function updateLocationInfo(lat, lng) {
+                    geocoder.reverse({
+                        lat,
+                        lng
+                    }, map.options.crs.scale(map.getZoom()), function(results) {
+                        if (results && results.length > 0) {
+                            document.getElementById("location-info").textContent = results[0].name;
+                        } else {
+                            document.getElementById("location-info").textContent =
+                                "Location information not available";
+                        }
+                    });
+                }
+
+                // Update hidden input fields and location information with the marker's position when dragged
+                marker.on('dragend', function(e) {
+                    const {
+                        lat,
+                        lng
+                    } = marker.getLatLng();
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lng;
+                    updateLocationInfo(lat, lng);
+                });
+
+                // Update marker position, hidden inputs, and location information when map is clicked
+                map.on('click', function(e) {
+                    const {
+                        lat,
+                        lng
+                    } = e.latlng;
+                    marker.setLatLng(e.latlng); // Move the marker to the clicked position
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lng;
+                    updateLocationInfo(lat, lng);
+                });
+
+                // Initialize hidden input fields with the initial marker position
+                document.getElementById("latitude").value = initialPosition[0];
+                document.getElementById("longitude").value = initialPosition[1];
+                updateLocationInfo(initialPosition[0], initialPosition[1]);
+
+                // Add Leaflet Control Geocoder for address search
+                L.Control.geocoder({
+                    defaultMarkGeocode: false
+                }).on('markgeocode', function(e) {
+                    const {
+                        lat,
+                        lng
+                    } = e.geocode.center;
+                    map.setView([lat, lng], 13); // Center the map on the found location
+                    marker.setLatLng([lat, lng]); // Move the marker to the found location
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lng;
+                    updateLocationInfo(lat, lng);
+                }).addTo(map);
+            });
+        </script>
+
     </body>
 
 </html>

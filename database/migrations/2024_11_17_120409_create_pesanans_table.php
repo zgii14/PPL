@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,6 +21,8 @@ return new class extends Migration
                   ->onDelete('cascade'); // Hapus pesanan jika user dihapus
             $table->integer('jumlah'); // Jumlah barang/paket
             $table->integer('total_harga'); // Total harga pesanan
+            $table->bigInteger('latitude'); // Latitude stored as integer (microdegrees)
+            $table->bigInteger('longitude'); // Longitude stored as integer (microdegrees)
 
             // Status tahapan proses laundry (1: Cuci, 2: Kering, 3: Strika, 4: Siap, 5: Selesai)
             $table->tinyInteger('status')->default(1)->comment('1: Penjemputan, 2: Cuci , 3: Kering, 4: Lipat, 5: Pengantaran, 6: Selesai');

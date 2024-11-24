@@ -28,32 +28,34 @@ class PesananController extends Controller
     // Menyimpan pesanan ke database
     public function store(Request $request)
     {
-        // Validate the order form
+        $request->validate([
+            'tipe' => 'required|in:select,create', // Validate tipe (either select or create)
+        ]);
+
+        if ($request->tipe == 'select') {
+            // Validate the user selection
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+            ]);
+        } elseif ($request->tipe == 'create') {
+            // Validate the new user form
+            $request->validate([
+                'new_user_name' => 'required|alpha_num|unique:users,name',
+              'latitude' => 'required|numeric|between:-90,90',
+    'longitude' => 'required|numeric|between:-180,180',
+            ]);
+        }
+
         $request->validate([
             'paket_id' => 'required|exists:paket_laundry,id',
             'jumlah' => 'required|integer|min:1',
-            'tipe' => 'required|in:select,create', // Validate tipe (either select or create)
-            'user_id' => 'required_if:tipe,select|exists:users,id', // Only required if tipe is 'select'
-            'new_user_name' => 'required_if:tipe,create|alpha_num|unique:users,name', // Only required if tipe is 'create'
-        ], [
-            'paket_id.required' => 'Silakan pilih paket laundry.',
-            'jumlah.required' => 'Silakan masukkan jumlah.',
-            'jumlah.integer' => 'Jumlah harus berupa angka.',
-            'jumlah.min' => 'Jumlah minimal adalah 1.',
-            'tipe.required' => 'Silakan pilih tipe pelanggan.',
-            'tipe.in' => 'Tipe pelanggan yang dipilih tidak valid.',
-            'user_id.required_if' => 'Silakan pilih pelanggan yang sudah ada.',
-            'user_id.exists' => 'Pelanggan yang dipilih tidak valid.',
-            'new_user_name.required_if' => 'Silakan masukkan nama pelanggan baru.',
-            'new_user_name.alpha_num' => 'Nama pelanggan baru hanya boleh mengandung huruf dan angka.',
-            'new_user_name.unique' => 'Nama pelanggan baru sudah terdaftar.',
         ]);
-    
+
         // Handle creation of user or use selected user based on tipe
         if ($request->tipe == 'create') {
-            // Create a new user
-            $sanitized_user_name = preg_replace('/[^a-zA-Z0-9_]/', '', $request->new_user_name); // Sanitize name
-    
+            // Sanitize the new user name
+            $sanitized_user_name = preg_replace('/[^a-zA-Z0-9_]/', '', $request->new_user_name);
+
             // Create new user
             $user = User::create([
                 'name' => $sanitized_user_name,
@@ -64,25 +66,34 @@ class PesananController extends Controller
             // Use the selected existing user
             $user = User::findOrFail($request->user_id);
         }
-    
+
         // Find the selected laundry package
         $paket = PaketLaundry::findOrFail($request->paket_id);
-    
+
         // Create the order (Pesanan)
-        Pesanan::create([
+        $pesanan = Pesanan::create([
             'paket_id' => $request->paket_id,
             'user_id' => $user->id, // Use the user ID (either existing or newly created)
             'jumlah' => $request->jumlah,
             'total_harga' => $paket->harga * $request->jumlah, // Calculate total price
             'status' => 0, // Initial status: Pending
+            'latitude' => $request->latitude * 1000000, // Store as microdegrees
+            'longitude' => $request->longitude * 1000000, // Store as microdegrees
         ]);
-    
+
+        // Create payment record
+        Pembayaran::firstOrCreate([
+            'pesanan_id' => $pesanan->id,
+            'status' => 'proses', // Assuming the default payment status is 'proses'
+        ], [
+            'nominal' => $pesanan->total_harga,  // Set nominal as total price from Pesanan
+            'metode_pembayaran' => null, // Assuming 'transfer' as default method, you can customize
+            'bukti_bayar' => null, // Initially no proof of payment, can be updated later
+        ]);
+
         // Redirect back to the order list with a success message
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat.');
     }
-    
-    
-    
 
     // Menampilkan detail pesanan
     public function show($id)
@@ -103,24 +114,33 @@ class PesananController extends Controller
     // Memperbarui pesanan
     public function update(Request $request, $id)
     {
+        // Validate the request inputs
         $request->validate([
             'paket_id' => 'required|exists:paket_laundry,id',
-            'jumlah' => 'required|integer|min:1', // Validasi status harus antara 0 - 5
+            'jumlah' => 'required|integer|min:1',
             'user_id' => 'required|exists:users,id',
+            'latitude' => 'required|numeric|between:-90,90', // Ensure latitude is within valid range
+            'longitude' => 'required|numeric|between:-180,180', // Ensure longitude is within valid range
         ]);
-
+    
+        // Find the existing order (Pesanan) and related laundry package (Paket)
         $pesanan = Pesanan::findOrFail($id);
         $paket = PaketLaundry::findOrFail($request->paket_id);
-
+    
+        // Update the order (Pesanan) with new data
         $pesanan->update([
             'paket_id' => $request->paket_id,
             'user_id' => $request->user_id,
             'jumlah' => $request->jumlah,
-            'total_harga' => $paket->harga * $request->jumlah,
+            'total_harga' => $paket->harga * $request->jumlah, // Recalculate total price
+            'latitude' => round($request->latitude * 1000000), // Convert to microdegrees
+            'longitude' => round($request->longitude * 1000000), // Convert to microdegrees
         ]);
-
+    
+        // Redirect back to the list with a success message
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diperbarui.');
     }
+    
 
     // Menghapus pesanan
     public function destroy($id)
@@ -133,90 +153,62 @@ class PesananController extends Controller
     // Update Status Pesanan (Berpindah ke Status Berikutnya)
     public function updateStatus(Request $request, $id)
     {
-        // Validate status field
         $request->validate([
             'status' => 'required|in:1,2,3,4,5,6',
         ]);
-    
-        // Find the Pesanan by ID
+
         $pesanan = Pesanan::findOrFail($id);
-    
-        // Update the pesanan status
         $pesanan->status = $request->status;
         $pesanan->save();
-    
-        // If status is 6 (Pengantaran), create a Pembayaran record
-        if ($request->status == 6) {
-            // Use firstOrCreate to check if Pembayaran already exists for this Pesanan
-            Pembayaran::firstOrCreate([
-                'pesanan_id' => $pesanan->id,
-                'status' => 'proses', // Assuming the default payment status is 'proses'
-            ], [
-                'nominal' => $pesanan->total_harga,  // Set nominal as total price from Pesanan
-                'metode_pembayaran' => 'transfer', // Assuming 'transfer' as default method, you can customize
-                'bukti_bayar' => null, // Initially no proof of payment, can be updated later
-            ]);
-        }
-    
+
         return redirect()->route('pesanan.index')->with('success', 'Status pesanan berhasil diperbarui.');
     }
-    
-    public function showAccPaymentForm($id)
-{
-    // Find the pesanan by ID
-    $pesanan = Pesanan::findOrFail($id);
 
-    if ($pesanan->status !== 6) {
-        return redirect()->route('pesanan.index')->with('error', 'Status pembayaran sudah berhasil');
+    // Konfirmasi Pembayaran
+    public function showAccPaymentForm($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+
+        if ($pesanan->status == 6) {
+            return redirect()->route('pesanan.index')->with('error', 'Status pembayaran sudah berhasil');
+        }
+
+        return view('pesanan.acc_payment', compact('pesanan'));
     }
 
-    // Show the payment confirmation form
-    return view('pesanan.acc_payment', compact('pesanan'));
-}
+    public function accPayment(Request $request, $id)
+    {
+        $request->validate([
+            'metode_pembayaran' => 'required|in:transfer,cash',
+            'bukti_bayar' => 'required|file|mimes:jpeg,jpg,png,pdf|max:2048',
+        ]);
 
-    
-public function accPayment(Request $request, $id)
-{
-    // Validate the input data
-    $request->validate([
-        'metode_pembayaran' => 'required|in:transfer,cash',
-        'bukti_bayar' => 'required|file|mimes:jpeg,jpg,png,pdf|max:2048',
-    ]);
+        $pesanan = Pesanan::findOrFail($id);
 
-    // Find the Pesanan by ID
-    $pesanan = Pesanan::findOrFail($id);
+        $pembayaran = Pembayaran::firstOrCreate([
+            'pesanan_id' => $pesanan->id,
+            'status' => 'proses',
+        ], [
+            'nominal' => $pesanan->total_harga,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'bukti_bayar' => $request->file('bukti_bayar')->store('bukti_bayar'),
+        ]);
 
-    // Create or update Pembayaran record
-    $pembayaran = Pembayaran::firstOrCreate([
-        'pesanan_id' => $pesanan->id,
-        'status' => 'proses', // Initially, set status to 'proses'
-    ], [
-        'nominal' => $pesanan->total_harga,
-        'metode_pembayaran' => $request->metode_pembayaran,
-        'bukti_bayar' => $request->file('bukti_bayar')->store('bukti_bayar'), // Store proof of payment
-    ]);
+        // $pesanan->status = 6; // Set status to "Selesai"
+        $pesanan->save();
 
-    // Update the status of the Pesanan to 'Selesai' (Completed) after payment is confirmed
-    // $pesanan->status = 6; // 'Selesai' status
-    $pesanan->save();
+        $pembayaran->status = 'berhasil';
+        $pembayaran->save();
 
-    // Update the Pembayaran status to 'berhasil' (successful)
-    $pembayaran->status = 'berhasil';
-    $pembayaran->save();
-
-    // Redirect to pesanan index with a success message
-    return redirect()->route('pesanan.index')->with('success', 'Pembayaran berhasil diterima dan pesanan selesai.');
-}
-
-
+        return redirect()->route('pesanan.index')->with('success', 'Pembayaran berhasil diterima dan pesanan selesai.');
+    }
 
     // Mengembalikan ke status sebelumnya (opsional)
     public function downgradeStatus(Request $request, $id)
     {
         $pesanan = Pesanan::findOrFail($id);
 
-        // Jika status belum pada tahap awal, mundur satu tahap
-        if ($pesanan->status > 0) { // 0: Status Pending
+        if ($pesanan->status > 0) {
             $pesanan->status -= 1;
             $pesanan->save();
 

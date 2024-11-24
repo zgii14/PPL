@@ -17,7 +17,7 @@ return new class extends Migration
                   ->constrained('pesanan') // Relasi ke tabel pesanan
                   ->onDelete('cascade'); // Hapus pesanan jika pembayaran dihapus
             $table->integer('nominal');
-            $table->enum('metode_pembayaran', ['transfer', 'cash']);
+            $table->enum('metode_pembayaran', ['transfer', 'cash'])->nullable();
             $table->string('bukti_bayar')->nullable();
             $table->enum('status', ['proses', 'berhasil', 'gagal'])->default('proses');
             $table->timestamps();

@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Pesanan extends Model
 {
     protected $table = 'pesanan'; // Nama tabel di database
-    protected $fillable = ['user_id', 'paket_id', 'jumlah', 'total_harga', 'status']; // Kolom yang dapat diisi
+    protected $fillable = [
+        'user_id',
+        'paket_id',
+        'jumlah',
+        'total_harga',
+        'status',
+        'latitude',   // Added latitude
+        'longitude'   // Added longitude
+    ]; // Kolom yang dapat diisi
 
     // Relasi ke model PaketLaundry
     public function paket()
@@ -21,23 +29,48 @@ class Pesanan extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function pembayaran(){
+    // Relasi ke model Pembayaran
+    public function pembayaran()
+    {
         return $this->hasOne(Pembayaran::class);
     }
 
+    // Status Label Accessor
     public function getStatusLabelAttribute()
-{
-    $statuses = [
-        1 => 'Penjemputan',
-        2 => 'Cuci',
-        3 => 'Kering',
-        4 => 'Lipat',
-        5 => 'Pengantaran',
-        6 => 'Selesai',
-        
-    ];
+    {
+        $statuses = [
+            1 => 'Penjemputan',
+            2 => 'Cuci',
+            3 => 'Kering',
+            4 => 'Lipat',
+            5 => 'Pengantaran',
+            6 => 'Selesai',
+        ];
 
-    return $statuses[$this->status] ?? 'Unknown';
-}
+        return $statuses[$this->status] ?? 'Unknown';
+    }
 
+    // Accessor to get latitude as a float
+    public function getLatitudeAttribute($value)
+    {
+        return $value / 1000000; // Convert microdegrees back to float
+    }
+
+    // Accessor to get longitude as a float
+    public function getLongitudeAttribute($value)
+    {
+        return $value / 1000000; // Convert microdegrees back to float
+    }
+
+    // Mutator to set latitude as an integer (microdegrees)
+    public function setLatitudeAttribute($value)
+    {
+        $this->attributes['latitude'] = (int) ($value * 1000000); // Store as integer (microdegrees)
+    }
+
+    // Mutator to set longitude as an integer (microdegrees)
+    public function setLongitudeAttribute($value)
+    {
+        $this->attributes['longitude'] = (int) ($value * 1000000); // Store as integer (microdegrees)
+    }
 }
