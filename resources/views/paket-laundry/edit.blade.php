@@ -37,7 +37,7 @@
         </div>
 
         <!-- Tombol Submit dan Batal -->
-        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahans</button>
         <a href="{{ route("paket-laundry.index") }}" class="btn btn-secondary">Batal</a>
     </form>
 @endsection
