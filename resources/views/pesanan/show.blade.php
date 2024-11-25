@@ -33,7 +33,40 @@
 
                     <div class="form-group">
                         <label><strong>Status Pesanan:</strong></label>
-                        <p>{{ ucfirst($pesanan->status) }}</p>
+                        <p>
+                            @switch($pesanan->status)
+                                @case(0)
+                                    <span class="badge badge-warning">Penjemputan</span>
+                                @break
+
+                                @case(1)
+                                    <span class="badge badge-info">Penjemputan</span>
+                                @break
+
+                                @case(2)
+                                    <span class="badge badge-danger">Cuci</span>
+                                @break
+
+                                @case(3)
+                                    <span class="badge badge-danger">Kering</span>
+                                @break
+
+                                @case(4)
+                                    <span class="badge badge-danger">Lipat</span>
+                                @break
+
+                                @case(5)
+                                    <span class="badge badge-info">Pengantaran</span>
+                                @break
+
+                                @case(6)
+                                    <span class="badge badge-success">Selesai dan Dibayar</span>
+                                @break
+
+                                @default
+                                    <span class="badge badge-light">Status Tidak Diketahui</span>
+                            @endswitch
+                        </p>
                     </div>
 
                     <!-- Map for Viewing Location -->
@@ -42,6 +75,10 @@
                         <div id="map" style="height: 300px; width: 100%;"></div>
                         <p><strong>Informasi Lokasi:</strong> <span id="location-info">Memuat lokasi...</span></p>
                     </div>
+
+                    <a href="{{ route("pesanan.cetak-pdf", $pesanan->id) }}" class="btn btn-primary" target="_blank">
+                        Cetak Struk PDF
+                    </a>
 
                     <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
                 </div>

@@ -122,5 +122,21 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+    'pdf' => [
+        'driver' => env('PDF_DRIVER', 'dompdf'), // Bisa 'dompdf' atau 'snappy' jika menggunakan driver lain.
+        'dompdf' => [
+            'enable_php' => true, // Mengaktifkan eksekusi PHP dalam PDF (opsional)
+            'orientation' => 'portrait', // Orientasi halaman (portrait/landscape)
+            'defines' => [
+                // Menambahkan beberapa pengaturan tambahan
+                'DOMPDF_ENABLE_HTML5PARSER' => true, // Aktifkan HTML5 parser
+                'DOMPDF_FONT_DIR' => storage_path('fonts'), // Lokasi font
+            ],
+        ],
+        'snappy' => [
+            'binary' => env('SNAPPY_PDF_BINARY', '/usr/local/bin/wkhtmltopdf'), // Lokasi binary wkhtmltopdf
+            'timeout' => 60, // Timeout untuk konversi PDF
+        ],
+    ],
 
 ];

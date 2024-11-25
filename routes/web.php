@@ -118,3 +118,4 @@ Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPayme
 
 // Route to process the payment and update status
 Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');
+Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');

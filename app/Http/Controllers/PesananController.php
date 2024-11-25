@@ -7,7 +7,7 @@ use App\Models\PaketLaundry;
 use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Barryvdh\DomPDF\Facade\PDF;
 class PesananController extends Controller
 {
     // Menampilkan daftar pesanan
@@ -217,4 +217,16 @@ class PesananController extends Controller
 
         return redirect()->back()->with('error', 'Status pesanan sudah pada tahap awal, tidak dapat dikurangi.');
     }
+    public function cetakPdf($id)
+{
+    // Ambil data pesanan berdasarkan ID
+    $pesanan = Pesanan::with('paket')->findOrFail($id);
+
+    // Buat PDF dari view 'pesanan.cetak_pdf'
+    $pdf = PDF::loadView('pesanan.cetak_pdf', compact('pesanan'));
+
+    // Unduh PDF dengan nama file sesuai ID pesanan
+   return $pdf->stream("struk-pesanan-{$pesanan->id}.pdf");
+}
+    
 }
