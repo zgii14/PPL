@@ -18,4 +18,9 @@ class PaketLaundry extends Model
         'jenis',
         'waktu',  // Tambahkan kolom waktu agar bisa disimpan
     ];
+
+    public function pesanans()
+    {
+        return $this->hasMany(Pesanan::class);
+    }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_paket');
             $table->text('deskripsi')->nullable();
             $table->integer('harga');
-            $table->string('waktu'); // Added waktu column
+            $table->datetime('waktu'); // Added waktu column
             $table->string('jenis'); // example: 'Standar', 'Ekspres'
             $table->timestamps();
         });

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\PaketLaundry;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -53,35 +54,35 @@ class DatabaseSeeder extends Seeder
                 'deskripsi' => 'Cuci pakaian dan dilipat rapi.',
                 'harga' => 15000,
                 'jenis' => 'Regular',
-                'waktu' => '1 Hari', // Diubah menjadi 1 Hari
+                'waktu' => Carbon::now()->addDays(1), // 1 Hari dari sekarang
             ],
             [
                 'nama_paket' => 'Paket Cuci Kering',
                 'deskripsi' => 'Pakaian dicuci dan dikeringkan.',
                 'harga' => 20000,
                 'jenis' => 'Regular',
-                'waktu' => '1 Hari', // Diubah menjadi 1 Hari
+                'waktu' => Carbon::now()->addDays(1), // 1 Hari dari sekarang
             ],
             [
                 'nama_paket' => 'Paket Express Cuci Kering Lipat',
                 'deskripsi' => 'Layanan express cuci, kering, dan lipat.',
                 'harga' => 30000,
                 'jenis' => 'Express',
-                'waktu' => '6 Jam', // Tetap menggunakan 6 Jam untuk express
+                'waktu' => Carbon::now()->addHours(6), // 6 Jam dari sekarang
             ],
             [
                 'nama_paket' => 'Paket Cuci Setrika',
                 'deskripsi' => 'Pakaian dicuci dan disetrika.',
                 'harga' => 25000,
                 'jenis' => 'Regular',
-                'waktu' => '1 Hari', // Diubah menjadi 1 Hari
+                'waktu' => Carbon::now()->addDays(1), // 1 Hari dari sekarang
             ],
             [
                 'nama_paket' => 'Paket Premium',
                 'deskripsi' => 'Layanan cuci, setrika, dan parfum khusus.',
                 'harga' => 40000,
                 'jenis' => 'Premium',
-                'waktu' => '2 Hari', // Tetap menggunakan 2 Hari
+                'waktu' => Carbon::now()->addDays(2), // 2 Hari dari sekarang
             ],
         ];
 

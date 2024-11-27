@@ -30,11 +30,12 @@
             <input type="number" name="harga" class="form-control" value="{{ $paketLaundry->harga }}" required>
         </div>
 
-        <!-- Input Waktu Paket -->
-        <div class="form-group">
-            <label>Waktu Penyelesaian</label>
-            <input type="text" name="waktu" class="form-control" value="{{ $paketLaundry->waktu }}" required>
-        </div>
+<!-- Input Waktu Paket -->
+<div class="form-group">
+    <label>Waktu Penyelesaian</label>
+    <input type="datetime-local" name="waktu" class="form-control" value="{{ \Carbon\Carbon::parse($paketLaundry->waktu)->format('Y-m-d\TH:i') }}" required>
+</div>
+
 
         <!-- Tombol Submit dan Batal -->
         <button type="submit" class="btn btn-primary">Simpan Perubahans</button>

@@ -96,11 +96,23 @@ class PesananController extends Controller
     }
 
     // Menampilkan detail pesanan
+    // Menampilkan detail pesanan
     public function show($id)
     {
+        // Mengambil data pesanan beserta paket dan user terkait
         $pesanan = Pesanan::with(['paket', 'user'])->findOrFail($id);
-        return view('pesanan.show', compact('pesanan'));
+    
+        // Menambahkan data waktu dari paket dan waktu pesanan
+        $waktuPaket = $pesanan->paket->waktu;  // Mengambil waktu dari paket yang terkait dengan pesanan
+        $createdAt = $pesanan->created_at; // Waktu pesanan dibuat
+    
+        // Menghitung selisih antara waktu pesanan dan waktu paket
+        $waktuGabungan = $createdAt->addMinutes($waktuPaket->diffInMinutes($createdAt));
+    
+        return view('pesanan.show', compact('pesanan', 'waktuGabungan', 'waktuPaket')); // Mengirim data pesanan dan waktu ke view
     }
+    
+
 
     // Menampilkan form edit pesanan
     public function edit($id)
@@ -156,13 +168,57 @@ class PesananController extends Controller
         $request->validate([
             'status' => 'required|in:1,2,3,4,5,6',
         ]);
-
+    
         $pesanan = Pesanan::findOrFail($id);
+    
+        // Periksa role pengguna yang sedang login
+        $userRole = auth()->user()->role;
+    
+        if ($userRole === 'kurir') {
+            // Kurir hanya dapat mengubah status ke 1 atau 5
+            if (!in_array($request->status, [1, 5])) {
+                return redirect()->back()->with(
+                    'error',
+                    'Anda adalah kurir. Anda hanya dapat mengubah status ke Penjemputan  atau Pengantaran.'
+                );
+            }
+        } elseif ($userRole !== 'staff') {
+            // Role lain selain 'staff' tidak diizinkan mengubah status
+            return redirect()->back()->with(
+                'error',
+                'Akses ditolak. Hanya staf yang diizinkan untuk mengubah ke status selain Penjemputan dan Pengantaran.'
+            );
+        }
+    
+        // Staf dapat mengubah ke semua status, sehingga tidak ada pembatasan di sini
+    
+        // Jika validasi lolos, simpan perubahan
         $pesanan->status = $request->status;
         $pesanan->save();
-
-        return redirect()->route('pesanan.index')->with('success', 'Status pesanan berhasil diperbarui.');
+    
+        return redirect()->route('pesanan.index')->with(
+            'success',
+            'Status pesanan berhasil diperbarui menjadi ' . $this->getStatusName($pesanan->status) . '.'
+        );
     }
+    
+    /**
+     * Helper untuk mendapatkan nama status berdasarkan kode status
+     */
+    protected function getStatusName($status)
+    {
+        $statusNames = [
+            1 => 'Penjemputan',
+            2 => 'Cuci',
+            3 => 'Kering',
+            4 => 'Lipat',
+            5 => 'Pengantaran',
+            6 => 'Selesai',
+        ];
+    
+        return $statusNames[$status] ?? 'Tidak Diketahui';
+    }
+    
 
     // Konfirmasi Pembayaran
     public function showAccPaymentForm($id)

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaketLaundryController;
 use App\Models\Pesanan;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\KurirController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -101,14 +102,15 @@ Route::delete('users/{user}', function (App\Models\User $user) {
     return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
 })->name('admin.users.destroy');
 
-Route::resource('paket-laundry', PaketLaundryController::class);
+Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth']);
 // routes/web.php
 
-Route::middleware(['auth', 'role:staff'])->group(function () {
-Route::resource('pesanan', PesananController::class);
-Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
-
+Route::middleware(['auth', 'role:staff,kurir'])->group(function () {
+    Route::resource('pesanan', PesananController::class);
+    Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
 });
+
+
 
 // In routes/web.php
 // In routes/web.php
@@ -119,3 +121,15 @@ Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPayme
 // Route to process the payment and update status
 Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');
 Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');
+// Menentukan middleware 'roleCheck' untuk memastikan hanya 'kurir' yang bisa mengakses
+// web.php (Route)
+Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
+    // Menampilkan daftar pesanan untuk kurir
+    Route::get('/pesanan', [KurirController::class, 'index'])->name('kurir.pesanan.index');
+
+    // Mengubah status pesanan menjadi "Dijemput" atau "Antar"
+    Route::patch('/pesanan/{id}/status', [KurirController::class, 'updateStatus'])->name('kurir.pesanan.updateStatus');
+
+    // Mengonfirmasi pembayaran (untuk pesanan dengan pembayaran cash)
+    Route::post('/pesanan/{id}/konfirmasi-bayar', [KurirController::class, 'konfirmasiBayar'])->name('kurir.pesanan.konfirmasiBayar');
+});

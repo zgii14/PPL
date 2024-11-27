@@ -14,7 +14,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header justify-content-between">
+                        <h4 class="mb-0">Pesanan</h4>
                         <a href="{{ route("pesanan.create") }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Tambah Pesanan Baru
                         </a>
@@ -27,7 +28,8 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
+                        <!-- Tabel Header -->
+                        <div class="card-header justify-content-between">
                             <h4>Tabel Pesanan</h4>
                             <div class="card-header-form">
                                 <!-- Form Pencarian -->
@@ -35,7 +37,7 @@
                                     <div class="input-group">
                                         <input type="text" name="search" class="form-control"
                                             placeholder="Cari Nama Pengguna" value="{{ request("search") }}">
-                                        <div class="input-group-btn">
+                                        <div class="input-group-append">
                                             <button class="btn btn-primary">
                                                 <i class="fas fa-search"></i> Cari
                                             </button>
@@ -45,20 +47,20 @@
                             </div>
                         </div>
 
-                        <div class="card-body p-3">
+                        <!-- Tabel Body -->
+                        <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table-striped table-bordered table">
-                                    <thead>
+                                <table class="table-striped table-bordered table-hover mb-0 table">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <th class="p-1 text-center">NO</th>
-                                            <th class="p-1 text-center">PAKET LAUNDRY</th>
-                                            <th class="p-1 text-center">PENGGUNA</th>
-                                            <th class="p-1 text-center">JUMLAH</th>
-                                            <th class="p-1 text-center">TOTAL HARGA</th>
-                                            <th class="p-1 text-center">TANGGAL PEMESANAN</th>
-                                            <th class="p-1 text-center">STATUS</th>
-                                            <th class="p-1 text-center">PEMBAYARAN</th>
-                                            <th class="p-1 text-center">AKSI</th>
+                                            <th class="text-center">No</th>
+                                            <th class="text-center">Paket Laundry</th>
+                                            <th class="text-center">Pengguna</th>
+                                            <th class="text-center">Jumlah</th>
+                                            <th class="text-center">Total Harga</th>
+                                            <th class="text-center">Status</th>
+                                            <th class="text-center">Pembayaran</th>
+                                            <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -73,19 +75,16 @@
                                                 <td class="text-center">Rp
                                                     {{ number_format($item->total_harga, 2, ",", ".") }}</td>
                                                 <td class="text-center">
-                                                    {{ $item->created_at->format("d-m-Y H:i") }}
-                                                </td>
-                                                <td class="text-center">
-                                                    <!-- Dropdown Status -->
                                                     <form action="{{ route("pesanan.update-status", $item->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method("PATCH")
-                                                        <select name="status" class="form-control"
+                                                        <select name="status" class="form-control form-control-lg"
+                                                            style="width: 100%; max-width: 200px;"
                                                             onchange="this.form.submit()">
                                                             <option value="1"
-                                                                {{ $item->status == 1 ? "selected" : "" }}>Penjemputan
-                                                            </option>
+                                                                {{ $item->status == 1 ? "selected" : "" }}
+                                                                class="status-dijemput">Dijemput</option>
                                                             <option value="2"
                                                                 {{ $item->status == 2 ? "selected" : "" }}>Cuci</option>
                                                             <option value="3"
@@ -93,41 +92,49 @@
                                                             <option value="4"
                                                                 {{ $item->status == 4 ? "selected" : "" }}>Lipat</option>
                                                             <option value="5"
-                                                                {{ $item->status == 5 ? "selected" : "" }}>Pengantaran
-                                                            </option>
+                                                                {{ $item->status == 5 ? "selected" : "" }}
+                                                                class="status-diantar">Diantar</option>
                                                             <option value="6"
-                                                                {{ $item->status == 6 ? "selected" : "" }}>Selesai
-                                                            </option>
+                                                                {{ $item->status == 6 ? "selected" : "" }}>Selesai</option>
                                                         </select>
                                                     </form>
                                                 </td>
-                                                <td>
-                                                    {{ $item->pembayaran ? $item->pembayaran->status : "Belum Dibayar" }}
-                                                </td>
-                                                <td class="text-center">
-                                                    <a href="{{ route("pesanan.show", $item->id) }}"
-                                                        class="btn btn-info btn-sm mx-1">
-                                                        <i class="fas fa-eye"></i> Detail
-                                                    </a>
-                                                    <a href="{{ route("pesanan.edit", $item->id) }}"
-                                                        class="btn btn-warning btn-sm mx-1">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-                                                    <form action="{{ route("pesanan.destroy", $item->id) }}" method="POST"
-                                                        class="delete-form d-inline">
-                                                        @csrf
-                                                        @method("DELETE")
-                                                        <button type="submit" class="btn btn-danger btn-sm mx-1">
-                                                            <i class="fas fa-trash"></i> Hapus
-                                                        </button>
-                                                    </form>
 
-                                                    @if ($item->pembayaran ? $item->pembayaran->status != "berhasil" : false)
-                                                        <a href="{{ route("pesanan.acc_payment", $item->id) }}"
-                                                            class="btn btn-success btn-sm mx-1">
-                                                            <i class="fas fa-check"></i> Konfirmasi Pembayaran
+                                                <td class="text-center">
+                                                    {{ $item->pembayaran ? ucfirst($item->pembayaran->status) : "Belum Dibayar" }}
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <div class="btn-group">
+                                                        <a href="{{ route("pesanan.show", $item->id) }}"
+                                                            class="btn btn-info btn-sm" title="Detail">
+                                                            <i class="fas fa-eye"></i>
                                                         </a>
-                                                    @endif
+
+                                                        @if (auth()->user()->role == "staff")
+                                                            <a href="{{ route("pesanan.edit", $item->id) }}"
+                                                                class="btn btn-warning btn-sm" title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <form action="{{ route("pesanan.destroy", $item->id) }}"
+                                                                method="POST" class="delete-form d-inline">
+                                                                @csrf
+                                                                @method("DELETE")
+                                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        @if ($item->pembayaran ? $item->pembayaran->status != "berhasil" : false)
+                                                            <a href="{{ route("pesanan.acc_payment", $item->id) }}"
+                                                                class="btn btn-success btn-sm"
+                                                                title="Konfirmasi Pembayaran">
+                                                                <i class="fas fa-check"></i>
+                                                            </a>
+                                                        @endif
+                                                    </div>
                                                 </td>
 
                                             </tr>
@@ -135,11 +142,11 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
 
-                            <!-- Pagination -->
-                            <div class="d-flex justify-content-center mt-3">
-                                {{ $pesanan->links() }}
-                            </div>
+                        <!-- Pagination -->
+                        <div class="card-footer d-flex justify-content-center">
+                            {{ $pesanan->links() }}
                         </div>
                     </div>
                 </div>

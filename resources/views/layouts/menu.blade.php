@@ -22,14 +22,16 @@
             <li>
                 <a class="nav-link" href="{{ route("paket-laundry.index") }}">Paket Laundry</a>
             </li>
-            @if (Auth::user()->role == "staff")
+            @if (Auth::user()->role == "staff" || Auth::user()->role == "kurir")
                 <li>
                     <a class="nav-link" href="{{ route("pesanan.index") }}">Pemesanan</a>
                 </li>
             @endif
             <li>
-                <a class="nav-link" href="">Data Kurir</a>
-            </li>
+                @if (Auth::user()->role == "kurir")
+            <li><a class="nav-link" href="{{ route("kurir.pesanan.index") }}">Data Kurir</a></li>
+    </li>
+    @endif
 
-        </ul>
-    </li>x
+</ul>
+</li>x

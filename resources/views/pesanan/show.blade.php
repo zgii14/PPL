@@ -28,8 +28,24 @@
 
                     <div class="form-group">
                         <label><strong>Total Harga:</strong></label>
-                        <p>Rp {{ number_format($pesanan->total_harga, 2) }}</p>
+                        <p>Rp {{ number_format($pesanan->total_harga, 2, ",", ".") }}</p>
                     </div>
+
+                    <div class="form-group">
+                        <label><strong>Tanggal Pemesanan:</strong></label>
+                        <p>{{ $pesanan->created_at->format("d-m-Y H:i") }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label><strong>Durasi:</strong></label>
+                        <p>{{ $pesanan->created_at->diffForHumans() }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label><strong>Waktu Gabungan:</strong></label>
+                        <p>{{ $waktuGabungan->format('d-m-Y H:i') }}</p>
+                    </div>
+                    
 
                     <div class="form-group">
                         <label><strong>Status Pesanan:</strong></label>
@@ -69,16 +85,19 @@
                         </p>
                     </div>
 
-                    <!-- Map for Viewing Location -->
+                    <!-- Lokasi -->
                     <div class="form-group">
                         <label><strong>Lokasi:</strong></label>
                         <div id="map" style="height: 300px; width: 100%;"></div>
                         <p><strong>Informasi Lokasi:</strong> <span id="location-info">Memuat lokasi...</span></p>
                     </div>
 
-                    <a href="{{ route("pesanan.cetak-pdf", $pesanan->id) }}" class="btn btn-primary" target="_blank">
-                        Cetak Struk PDF
-                    </a>
+                    <!-- Tombol Cetak Struk PDF hanya untuk staff -->
+                    @if (auth()->user()->role == "staff")
+                        <a href="{{ route("pesanan.cetak-pdf", $pesanan->id) }}" class="btn btn-primary" target="_blank">
+                            Cetak Struk PDF
+                        </a>
+                    @endif
 
                     <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
                 </div>
@@ -90,13 +109,11 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Latitude and Longitude from the pesanan object
             const position = [
                 {{ $pesanan->latitude / 1000000 }},
                 {{ $pesanan->longitude / 1000000 }}
             ];
 
-            // Initialize map
             const map = L.map('map').setView(position, 13);
             L.tileLayer(
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -104,13 +121,10 @@
                     attribution: '&copy; <a href="https://www.esri.com">Esri</a>, Earthstar Geographics'
                 }).addTo(map);
 
-            // Add marker
             const marker = L.marker(position).addTo(map);
 
-            // Initialize geocoder
             const geocoder = L.Control.Geocoder.nominatim();
 
-            // Update location information using reverse geocoding
             function updateLocationInfo(lat, lng) {
                 geocoder.reverse({
                     lat,
@@ -125,7 +139,6 @@
                 });
             }
 
-            // Update location information based on marker's position
             updateLocationInfo(position[0], position[1]);
         });
     </script>

@@ -22,7 +22,7 @@
                                 class="form-control @error("paket_id") is-invalid @enderror">
                                 @foreach ($paket as $item)
                                     <option value="{{ $item->id }}">{{ $item->nama_paket }} - Rp
-                                        {{ number_format($item->harga, 2) }}</option>
+                                        {{ number_format($item->harga, 2) }} ({{ $item->waktu }})</option>
                                 @endforeach
                             </select>
                             @error("paket_id")
@@ -52,7 +52,8 @@
                                 class="form-control @error("user_id") is-invalid @enderror">
                                 <option value="">Pilih Pelanggan</option>
                                 @foreach ($users as $user)
-                                    <option value="{{ $user->id }}" {{ old("user_id") == $user->id ? "selected" : "" }}>
+                                    <option value="{{ $user->id }}"
+                                        {{ old("user_id") == $user->id ? "selected" : "" }}>
                                         {{ $user->name }}</option>
                                 @endforeach
                             </select>
@@ -146,19 +147,24 @@
                 draggable: true
             }).addTo(map);
 
-            // Function to update location information using reverse geocoding
             function updateLocationInfo(lat, lng) {
-                geocoder.reverse({
-                    lat,
-                    lng
-                }, map.options.crs.scale(map.getZoom()), function(results) {
-                    if (results && results.length > 0) {
-                        document.getElementById("location-info").textContent = results[0].name;
-                    } else {
+                // Reverse geocode using Nominatim
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            document.getElementById("location-info").textContent = data
+                                .display_name; // Show full address
+                        } else {
+                            document.getElementById("location-info").textContent =
+                                "Location information not available";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching location info:", err);
                         document.getElementById("location-info").textContent =
-                            "Location information not available";
-                    }
-                });
+                            "Error fetching location information";
+                    });
             }
 
             marker.on('dragend', function(e) {
@@ -194,7 +200,6 @@
                 }
             });
 
-
             // Initialize hidden input fields with the initial marker position
             document.getElementById("latitude").value = initialPosition[0];
             document.getElementById("longitude").value = initialPosition[1];
@@ -202,18 +207,20 @@
 
             // Add Leaflet Control Geocoder for address search
             L.Control.geocoder({
-                defaultMarkGeocode: false
-            }).on('markgeocode', function(e) {
-                const {
-                    lat,
-                    lng
-                } = e.geocode.center;
-                map.setView([lat, lng], 13); // Center the map on the found location
-                marker.setLatLng([lat, lng]); // Move the marker to the found location
-                document.getElementById("latitude").value = lat;
-                document.getElementById("longitude").value = lng;
-                updateLocationInfo(lat, lng);
-            }).addTo(map);
+                    defaultMarkGeocode: false
+                })
+                .on('markgeocode', function(e) {
+                    const {
+                        lat,
+                        lng
+                    } = e.geocode.center;
+                    map.setView([lat, lng], 13); // Center the map on the found location
+                    marker.setLatLng([lat, lng]); // Move the marker to the found location
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lng;
+                    updateLocationInfo(lat, lng);
+                })
+                .addTo(map);
         });
     </script>
 @endsection

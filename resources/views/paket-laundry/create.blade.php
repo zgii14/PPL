@@ -53,11 +53,11 @@
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 <!-- Input Waktu Paket -->
                                 <div class="mb-3">
                                     <label for="waktu" class="form-label">Waktu Penyelesaian</label>
-                                    <input type="text" name="waktu" id="waktu" class="form-control" required>
+                                    <input type="datetime-local" name="waktu" id="waktu" class="form-control"
+                                        required>
                                     @error("waktu")
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
