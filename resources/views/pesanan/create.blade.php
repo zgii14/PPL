@@ -22,7 +22,7 @@
                                 class="form-control @error("paket_id") is-invalid @enderror">
                                 @foreach ($paket as $item)
                                     <option value="{{ $item->id }}">{{ $item->nama_paket }} - Rp
-                                        {{ number_format($item->harga, 2) }} ({{ $item->waktu }})</option>
+                                        {{ number_format($item->harga, 2) }} ({{ $item->waktu_formatted }})</option>
                                 @endforeach
                             </select>
                             @error("paket_id")

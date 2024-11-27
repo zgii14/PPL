@@ -42,10 +42,22 @@
                     </div>
 
                     <div class="form-group">
-                        <label><strong>Waktu Gabungan:</strong></label>
-                        <p>{{ $waktuGabungan->format('d-m-Y H:i') }}</p>
+                        <label><strong>Waktu Selesai:</strong></label>
+                        <p>{{ $pesanan->waktu_selesai }}</p>
                     </div>
-                    
+
+                    <!-- In your Blade view -->
+                    @if ($pesanan->pembayaran)
+                        <div>
+                            <strong>Bukti Bayar:</strong> <!-- Label for payment proof -->
+                        </div>
+                        <div>
+                            <img src="{{ $pesanan->pembayaran->bukti_bayar }}" alt="Bukti Bayar" class="img-fluid"
+                                style="max-width: 400px; max-height: 400px;">
+                        </div>
+                    @else
+                        <p>No payment proof available</p>
+                    @endif
 
                     <div class="form-group">
                         <label><strong>Status Pesanan:</strong></label>

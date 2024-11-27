@@ -36,9 +36,8 @@
 
                             <div class="mb-3">
                                 <label for="waktu" class="form-label"><strong>Waktu Penyelesaian</strong></label>
-                                <p>{{ \Carbon\Carbon::parse($paketLaundry->waktu)->format('d-m-Y H:i') }}</p>
+                                <p>{{ $paketLaundry->waktu_formatted }}</p>
                             </div>
-                            
 
                             <a href="{{ route("paket-laundry.index") }}" class="btn btn-secondary">Kembali</a>
                         </div>

@@ -14,8 +14,7 @@
                             <h4>Buat Paket Laundry Baru</h4>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route("paket-laundry.store") }}" method="POST"
-                                class="rounded bg-white p-4 shadow">
+                            <form action="{{ route('paket-laundry.store') }}" method="POST" class="rounded bg-white p-4 shadow">
                                 @csrf
 
                                 <!-- Input Nama Paket -->
@@ -53,11 +52,11 @@
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
                                 </div>
+
                                 <!-- Input Waktu Paket -->
                                 <div class="mb-3">
-                                    <label for="waktu" class="form-label">Waktu Penyelesaian</label>
-                                    <input type="datetime-local" name="waktu" id="waktu" class="form-control"
-                                        required>
+                                    <label for="waktu" class="form-label">Waktu Penyelesaian (Jam)</label>
+                                    <input type="number" name="waktu" id="waktu" class="form-control" required>
                                     @error("waktu")
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
@@ -65,7 +64,7 @@
 
                                 <!-- Tombol Submit dan Batal -->
                                 <button type="submit" class="btn btn-primary">Tambah Paket</button>
-                                <a href="{{ route("paket-laundry.index") }}" class="btn btn-secondary">Batal</a>
+                                <a href="{{ route('paket-laundry.index') }}" class="btn btn-secondary">Batal</a>
                             </form>
                         </div>
                     </div>

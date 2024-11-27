@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Storage;
 class Pembayaran extends Model
 {
     use HasFactory;
@@ -37,5 +37,16 @@ class Pembayaran extends Model
         ];
 
         return $statusLabels[$this->status] ?? 'Status Tidak Dikenal';
+    }
+    public function getBuktiBayarAttribute($value)
+    {
+        // Check if the file exists and generate the URL
+        if ($value) {
+            // If using the 'public' disk, return the URL
+            return Storage::url($value); // This will generate the correct URL for the file
+        }
+
+        // If no file exists, return a default image or null
+        return null; // Or a default image URL
     }
 }

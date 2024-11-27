@@ -73,4 +73,19 @@ class Pesanan extends Model
     {
         $this->attributes['longitude'] = (int) ($value * 1000000); // Store as integer (microdegrees)
     }
+
+        // Define the accessor for 'waktuPaket'
+        public function getWaktuPaketAttribute()
+        {
+            return $this->paket->waktu;  // Convert waktu to integer
+        }
+    
+        // Define the accessor for 'waktuGabungan' (calculated value)
+        public function getWaktuSelesaiAttribute()
+        {
+            $waktuPaket = $this->waktuPaket;  // Get the waktuPaket using the accessor
+            $createdAt = $this->created_at;    // Get the created_at timestamp of the pesanan
+    
+            return $createdAt->addHours($waktuPaket)->format('d-m-Y H:i');  // Add the waktuPaket in hours to created_at
+        }
 }

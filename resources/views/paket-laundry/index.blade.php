@@ -70,7 +70,7 @@
                                                 <td class="text-center">Rp {{ number_format($item->harga, 0, ",", ".") }}
                                                 </td>
                                                 <td class="text-center">
-                                                    {{ $item->waktu }} <!-- Menampilkan kolom 'waktu' -->
+                                                    {{ $item->waktu_formatted }} <!-- Menampilkan kolom 'waktu' -->
                                                 </td>
                                                 <td class="text-center">
                                                     <!-- Limit the description length if it's too long -->

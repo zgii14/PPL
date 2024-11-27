@@ -39,7 +39,7 @@ class PaketLaundryController extends Controller
             'nama_paket' => 'required|string|max:255',
             'harga' => 'required|numeric',
             'jenis' => 'required|string',
-            'waktu' => 'required|date', // Menambahkan validasi untuk waktu
+            'waktu' => 'required|integer|min:1', // Menambahkan validasi untuk waktu
             'deskripsi' => 'nullable|string', // Validasi deskripsi yang bisa kosong
         ]);
 
@@ -76,7 +76,7 @@ class PaketLaundryController extends Controller
             'nama_paket' => 'required|string|max:255',
             'harga' => 'required|numeric',
             'jenis' => 'required|string',
-            'waktu' => 'required|date', // Menambahkan validasi untuk waktu
+            'waktu' => 'required|integer|min:1', // Menambahkan validasi untuk waktu
             'deskripsi' => 'nullable|string', // Validasi deskripsi yang bisa kosong
         ]);
 

@@ -22,7 +22,7 @@
             <li>
                 <a class="nav-link" href="{{ route("paket-laundry.index") }}">Paket Laundry</a>
             </li>
-            @if (Auth::user()->role == "staff" || Auth::user()->role == "kurir")
+            @if (Auth::user()->role == "staff" || Auth::user()->role == "kurir" || Auth::user()->role == "admin")
                 <li>
                     <a class="nav-link" href="{{ route("pesanan.index") }}">Pemesanan</a>
                 </li>

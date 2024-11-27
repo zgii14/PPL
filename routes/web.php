@@ -6,7 +6,7 @@ use App\Http\Controllers\PaketLaundryController;
 use App\Models\Pesanan;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KurirController;
-
+use App\Http\Controllers\AdminController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -105,7 +105,7 @@ Route::delete('users/{user}', function (App\Models\User $user) {
 Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth']);
 // routes/web.php
 
-Route::middleware(['auth', 'role:staff,kurir'])->group(function () {
+Route::middleware(['auth', 'role:staff,kurir,admin'])->group(function () {
     Route::resource('pesanan', PesananController::class);
     Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
 });

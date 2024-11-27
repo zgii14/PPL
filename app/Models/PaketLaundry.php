@@ -12,15 +12,32 @@ class PaketLaundry extends Model
     protected $table = 'paket_laundry';
 
     protected $fillable = [
-        'nama_paket',
-        'deskripsi',  // Pastikan deskripsi ada di sini
-        'harga',
-        'jenis',
-        'waktu',  // Tambahkan kolom waktu agar bisa disimpan
+        'nama_paket', 'deskripsi', 'harga', 'jenis', 'waktu'
     ];
 
-    public function pesanans()
+    /**
+     * Get the formatted 'waktu' (duration).
+     */
+    public function getWaktuFormattedAttribute()
     {
-        return $this->hasMany(Pesanan::class);
+        $waktu = $this->waktu;
+
+        // If the waktu is greater than or equal to 24, show it as days
+        if ($waktu >= 24) {
+            $days = intdiv($waktu, 24); // Calculate number of full days
+            $hours = $waktu % 24; // Calculate remaining hours
+            if ($hours > 0) {
+                return "{$days} Hari {$hours} Jam";  // Show as days and hours
+            }
+            return "{$days} Hari";  // Show only days if there are no remaining hours
+        }
+
+        // If the waktu is less than 24 hours, show it as hours
+        return "{$waktu} Jam";  // Show as hours
+    }
+
+    public function pesanan()
+    {
+        return $this->hasMany(Pesanan::class, 'paket_id');
     }
 }

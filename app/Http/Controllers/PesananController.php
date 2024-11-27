@@ -8,14 +8,32 @@ use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Log;
+
 class PesananController extends Controller
 {
     // Menampilkan daftar pesanan
     public function index()
     {
-        $pesanan = Pesanan::with(['paket', 'user'])->paginate(10);
+        // Check if the user is an admin
+        $userRole = auth()->user()->role;
+    
+        if ($userRole === 'admin') {
+            // Get only completed orders (status 6) with successful payments (status 'berhasil')
+            $pesanan = Pesanan::with(['paket', 'user'])
+                ->where('status', 6)  // Only completed orders
+                ->whereHas('pembayaran', function ($query) {
+                    $query->where('status', 'berhasil');  // Only successful payments
+                })
+                ->paginate(10);
+        } else {
+            // If the user is not an admin, we can either throw an exception or show a different set of orders
+            $pesanan = Pesanan::with(['paket', 'user'])->paginate(10);  // Modify this line as per your needs
+        }
+    
         return view('pesanan.index', compact('pesanan'));
     }
+    
 
     // Menampilkan form pembuatan pesanan
     public function create()
@@ -95,22 +113,16 @@ class PesananController extends Controller
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat.');
     }
 
-    // Menampilkan detail pesanan
-    // Menampilkan detail pesanan
     public function show($id)
     {
         // Mengambil data pesanan beserta paket dan user terkait
         $pesanan = Pesanan::with(['paket', 'user'])->findOrFail($id);
     
-        // Menambahkan data waktu dari paket dan waktu pesanan
-        $waktuPaket = $pesanan->paket->waktu;  // Mengambil waktu dari paket yang terkait dengan pesanan
-        $createdAt = $pesanan->created_at; // Waktu pesanan dibuat
-    
-        // Menghitung selisih antara waktu pesanan dan waktu paket
-        $waktuGabungan = $createdAt->addMinutes($waktuPaket->diffInMinutes($createdAt));
-    
-        return view('pesanan.show', compact('pesanan', 'waktuGabungan', 'waktuPaket')); // Mengirim data pesanan dan waktu ke view
+        // Mengirim data pesanan dan waktu gabungan ke view
+        return view('pesanan.show', compact('pesanan'));
     }
+    
+    
     
 
 
@@ -236,28 +248,45 @@ class PesananController extends Controller
     {
         $request->validate([
             'metode_pembayaran' => 'required|in:transfer,cash',
-            'bukti_bayar' => 'required|file|mimes:jpeg,jpg,png,pdf|max:2048',
+            'bukti_bayar' => 'required|file|mimes:jpeg,jpg,png,pdf|max:2048',  // File validation rules
         ]);
+    
+        $pesanan = Pesanan::findOrFail($id);  // Find the order by its ID
+    
+        // Handle the file upload and store the file path
+        $filePath = $request->file('bukti_bayar')->store('bukti_bayar', 'public');  // Save the file in 'storage/app/public/bukti_bayar' directory
 
-        $pesanan = Pesanan::findOrFail($id);
+        // Create or update the payment record
+        $pembayaran = Pembayaran::where('pesanan_id', $pesanan->id)
+        ->where('status', 'proses') // Ensure we're updating a "proses" payment status
+        ->first();  // Find the existing record
 
-        $pembayaran = Pembayaran::firstOrCreate([
-            'pesanan_id' => $pesanan->id,
-            'status' => 'proses',
-        ], [
+    if ($pembayaran) {
+        // If Pembayaran exists, update it
+        $pembayaran->update([
             'nominal' => $pesanan->total_harga,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'bukti_bayar' => $request->file('bukti_bayar')->store('bukti_bayar'),
+            'bukti_bayar' => $filePath,  // Save the file path in the database
+            'status' => 'berhasil',  // Set payment status to 'berhasil'
         ]);
-
-        // $pesanan->status = 6; // Set status to "Selesai"
-        $pesanan->save();
-
-        $pembayaran->status = 'berhasil';
-        $pembayaran->save();
-
+    } else {
+        // If Pembayaran doesn't exist, create a new one
+        $pembayaran = Pembayaran::create([
+            'pesanan_id' => $pesanan->id,
+            'nominal' => $pesanan->total_harga,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'bukti_bayar' => $filePath,  // Save the file path in the database
+            'status' => 'berhasil',  // Set payment status to 'berhasil'
+        ]);
+    }
+    
+        // Optionally, update the order status (if needed)
+        // $pesanan->status = 6;  // Set status to "Selesai" (complete)
+        $pesanan->save();  // Save the updated order
+    
         return redirect()->route('pesanan.index')->with('success', 'Pembayaran berhasil diterima dan pesanan selesai.');
     }
+    
 
     // Mengembalikan ke status sebelumnya (opsional)
     public function downgradeStatus(Request $request, $id)
