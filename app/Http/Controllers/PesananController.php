@@ -38,9 +38,17 @@ class PesananController extends Controller
     // Menampilkan form pembuatan pesanan
     public function create()
     {
+        
         $paket = PaketLaundry::all();
         $users = User::all();
         return view('pesanan.create', compact('paket', 'users'));
+
+        if (auth()->user()->role === 'kurir') {
+            abort(403, 'Kurir tidak diizinkan untuk membuat pesanan.');
+        }
+    
+        // Render create view for allowed roles
+        return view('pesanan.create');
     }
 
     // Menyimpan pesanan ke database
@@ -84,7 +92,10 @@ class PesananController extends Controller
             // Use the selected existing user
             $user = User::findOrFail($request->user_id);
         }
-
+        if (auth()->user()->role === 'kurir') {
+            abort(403, 'Kurir tidak diizinkan untuk membuat pesanan.');
+        }
+    
         // Find the selected laundry package
         $paket = PaketLaundry::findOrFail($request->paket_id);
 

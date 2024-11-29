@@ -30,7 +30,7 @@
                             @enderror
                         </div>
 
-                        <!-- Tipe (Select or Create) -->
+                        <!-- Tipe Pelanggan -->
                         <div class="mb-3">
                             <label for="tipe" class="form-label">Tipe Pelanggan</label>
                             <select name="tipe" id="tipe" class="form-control @error("tipe") is-invalid @enderror"
@@ -53,8 +53,7 @@
                                 <option value="">Pilih Pelanggan</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->id }}"
-                                        {{ old("user_id") == $user->id ? "selected" : "" }}>
-                                        {{ $user->name }}</option>
+                                        {{ old("user_id") == $user->id ? "selected" : "" }}>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                             @error("user_id")
@@ -86,7 +85,7 @@
                         <!-- Location (Latitude and Longitude) -->
                         <div class="mb-3">
                             <label for="location" class="form-label">Pilih Lokasi</label>
-                            <div id="map" style="height: 300px; width: 100%;"></div>
+                            <div id="map" style="height: 400px; width: 100%;"></div>
                             <input type="hidden" id="latitude" name="latitude" value="{{ old("latitude") }}">
                             <input type="hidden" id="longitude" name="longitude" value="{{ old("longitude") }}">
                             <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the
@@ -116,7 +115,6 @@
             var selectDiv = document.getElementById('user_select');
             var inputDiv = document.getElementById('user_create');
 
-            // Toggle visibility based on selected 'tipe'
             if (tipe === 'select') {
                 selectDiv.style.display = 'block';
                 inputDiv.style.display = 'none';
@@ -133,104 +131,90 @@
 
         // Initialize Leaflet map
         document.addEventListener("DOMContentLoaded", function() {
-            const initialPosition = [-3.7889, 102.2655]; // Bengkulu position [latitude, longitude]
+            const map = L.map('map').setView([-3.7889, 102.2655], 13); // Default position in Bengkulu
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-            const map = L.map('map').setView(initialPosition, 13);
-            L.tileLayer(
-                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="https://www.esri.com">Esri</a>, Earthstar Geographics'
-                }).addTo(map);
+            // Add geocoder control for searching places
+            L.Control.geocoder().addTo(map);
 
-            const geocoder = L.Control.Geocoder.nominatim();
-            const marker = L.marker(initialPosition, {
+            // Add draggable marker for customer location selection
+            const destinationMarker = L.marker([-3.7889, 102.2655], {
                 draggable: true
             }).addTo(map);
 
+            // Function to update the location info
             function updateLocationInfo(lat, lng) {
-                // Reverse geocode using Nominatim
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                     .then(response => response.json())
                     .then(data => {
-                        if (data && data.display_name) {
-                            document.getElementById("location-info").textContent = data
-                                .display_name; // Show full address
-                        } else {
-                            document.getElementById("location-info").textContent =
-                                "Location information not available";
-                        }
+                        const locationInfo = data && data.display_name ? data.display_name :
+                            'Location information not available';
+                        document.getElementById("location-info").textContent = locationInfo;
                     })
                     .catch(err => {
                         console.error("Error fetching location info:", err);
                         document.getElementById("location-info").textContent =
-                            "Error fetching location information";
+                            'Error fetching location information';
                     });
             }
 
-            marker.on('dragend', function(e) {
+            // Update hidden latitude and longitude fields when marker is dragged
+            destinationMarker.on('dragend', function(e) {
                 const {
                     lat,
                     lng
-                } = marker.getLatLng();
-
-                // Validate latitude and longitude before assigning
-                if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    document.getElementById("latitude").value = lat;
-                    document.getElementById("longitude").value = lng;
-                    updateLocationInfo(lat, lng);
-                } else {
-                    alert("Invalid latitude or longitude values.");
-                }
+                } = destinationMarker.getLatLng();
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+                updateLocationInfo(lat, lng);
             });
 
+            // Update location info when map is clicked
             map.on('click', function(e) {
                 const {
                     lat,
                     lng
                 } = e.latlng;
-
-                // Validate latitude and longitude before assigning
-                if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    marker.setLatLng(e.latlng); // Move marker to clicked position
-                    document.getElementById("latitude").value = lat;
-                    document.getElementById("longitude").value = lng;
-                    updateLocationInfo(lat, lng);
-                } else {
-                    alert("Invalid latitude or longitude values.");
-                }
+                destinationMarker.setLatLng([lat, lng]);
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+                updateLocationInfo(lat, lng);
             });
 
-            // Initialize hidden input fields with the initial marker position
-            document.getElementById("latitude").value = initialPosition[0];
-            document.getElementById("longitude").value = initialPosition[1];
-            updateLocationInfo(initialPosition[0], initialPosition[1]);
+            // Automatically get the user's current location via Geolocation API
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
 
-            // Add Leaflet Control Geocoder for address search
-            L.Control.geocoder({
-                    defaultMarkGeocode: false
-                })
-                .on('markgeocode', function(e) {
-                    const {
-                        lat,
-                        lng
-                    } = e.geocode.center;
-                    map.setView([lat, lng], 13); // Center the map on the found location
-                    marker.setLatLng([lat, lng]); // Move the marker to the found location
-                    document.getElementById("latitude").value = lat;
-                    document.getElementById("longitude").value = lng;
-                    updateLocationInfo(lat, lng);
-                })
-                .addTo(map);
+                    // Set the map view to the user's location
+                    map.setView([userLat, userLng], 13);
+
+                    // Set the marker to the user's location
+                    destinationMarker.setLatLng([userLat, userLng]);
+
+                    // Update the latitude and longitude fields
+                    document.getElementById('latitude').value = userLat;
+                    document.getElementById('longitude').value = userLng;
+
+                    // Update the location info
+                    updateLocationInfo(userLat, userLng);
+                }, function(error) {
+                    alert("Unable to retrieve your location.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
         });
     </script>
 @endsection
 
 @push("css")
-    <!-- Include Leaflet CSS and JS -->
+    <!-- Include Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-    <!-- Include Leaflet Control Geocoder CSS and JS -->
+    <!-- Include Leaflet Control Geocoder CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 @endpush

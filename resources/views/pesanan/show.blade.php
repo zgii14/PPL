@@ -46,10 +46,9 @@
                         <p>{{ $pesanan->waktu_selesai }}</p>
                     </div>
 
-                    <!-- In your Blade view -->
                     @if ($pesanan->pembayaran)
                         <div>
-                            <strong>Bukti Bayar:</strong> <!-- Label for payment proof -->
+                            <strong>Bukti Bayar:</strong>
                         </div>
                         <div>
                             <img src="{{ $pesanan->pembayaran->bukti_bayar }}" alt="Bukti Bayar" class="img-fluid"
@@ -98,11 +97,19 @@
                     </div>
 
                     <!-- Lokasi -->
-                    <div class="form-group">
+                    <div class="form-group" id="tampilkan-rute">
                         <label><strong>Lokasi:</strong></label>
                         <div id="map" style="height: 300px; width: 100%;"></div>
                         <p><strong>Informasi Lokasi:</strong> <span id="location-info">Memuat lokasi...</span></p>
                     </div>
+
+                    <!-- Show 'Tampilkan Rute' button only if the user is Kurir -->
+                    @if (auth()->user()->role == "kurir")
+                        <!-- Button to Show Route -->
+                        <div class="form-group">
+                            <button id="showRouteButton" class="btn btn-primary">Tampilkan Rute</button>
+                        </div>
+                    @endif
 
                     <!-- Tombol Cetak Struk PDF hanya untuk staff -->
                     @if (auth()->user()->role == "staff")
@@ -119,40 +126,91 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/lrm-translation-id.min.js"></script> <!-- Indonesian Translation -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const position = [
+            // Kurir's default position (for example purposes, you can modify this if needed)
+            const kurirPosition = [-3.7603971992778313, 102.27822456249069];
+
+            // User's location from the pesanan model
+            const userPosition = [
                 {{ $pesanan->latitude / 1000000 }},
                 {{ $pesanan->longitude / 1000000 }}
             ];
 
-            const map = L.map('map').setView(position, 13);
+            // User's name from the model
+            const userName =
+                "{{ $pesanan->user->name }}"; // Assuming you have a user object related to the pesanan
+
+            const map = L.map('map').setView(kurirPosition, 13);
             L.tileLayer(
-                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
-                    attribution: '&copy; <a href="https://www.esri.com">Esri</a>, Earthstar Geographics'
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-            const marker = L.marker(position).addTo(map);
+            // Add marker for kurir only if the logged-in user is Kurir
+            @if (auth()->user()->role == "kurir")
+                const kurirMarker = L.marker(kurirPosition).addTo(map).bindPopup(
+                    "<strong>Laundry Lubis</strong><br>" +
+                    "Laundry Lubis Center"
+                );
+            @endif
 
-            const geocoder = L.Control.Geocoder.nominatim();
+            // Add marker for user with the user's name
+            const userMarker = L.marker(userPosition).addTo(map).bindPopup(
+                "<strong>" + userName + "</strong><br>" +
+                "Rumah " + userName
+            );
 
-            function updateLocationInfo(lat, lng) {
-                geocoder.reverse({
-                    lat,
-                    lng
-                }, map.options.crs.scale(map.getZoom()), function(results) {
-                    if (results && results.length > 0) {
-                        document.getElementById("location-info").textContent = results[0].name;
-                    } else {
-                        document.getElementById("location-info").textContent =
-                            "Informasi lokasi tidak tersedia.";
-                    }
+            let routeControl;
+
+            // Function to calculate and display the route
+            function showRoute() {
+                // If a route already exists, remove it
+                if (routeControl) {
+                    routeControl.remove();
+                }
+
+                // Add a route from kurir to user
+                routeControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(kurirPosition),
+                        L.latLng(userPosition)
+                    ],
+                    routeWhileDragging: true,
+                }).addTo(map);
+            }
+
+            // Event listener for the button click (only visible for Kurir)
+            const showRouteButton = document.getElementById("showRouteButton");
+            if (showRouteButton) {
+                showRouteButton.addEventListener("click", function() {
+                    showRoute();
                 });
             }
 
-            updateLocationInfo(position[0], position[1]);
+            // Update location information for user
+            updateLocationInfo(userPosition[0], userPosition[1]);
         });
+
+        // Function to fetch location details and display
+        function updateLocationInfo(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    const locationInfo = data && data.display_name ? data.display_name :
+                        'Location information not available';
+                    document.getElementById("location-info").textContent = locationInfo;
+                })
+                .catch(err => {
+                    console.error("Error fetching location info:", err);
+                    document.getElementById("location-info").textContent = 'Error fetching location information';
+                });
+        }
     </script>
 @endsection
 
@@ -164,4 +222,8 @@
     <!-- Include Leaflet Control Geocoder CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <!-- Include Leaflet Routing Machine CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 @endpush
