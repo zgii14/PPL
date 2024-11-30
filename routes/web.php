@@ -7,13 +7,15 @@ use App\Models\Pesanan;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KurirController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LocationController;
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Place this after other routes for clarity
+
+Route::middleware(['auth', 'verified'])->get('/dashboard', [PesananController::class, 'dashboard'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -105,7 +107,7 @@ Route::delete('users/{user}', function (App\Models\User $user) {
 Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth']);
 // routes/web.php
 
-Route::middleware(['auth', 'role:staff,admin,kurir'])->group(function () {
+Route::middleware(['auth', 'role:staff,admin,kurir,pelanggan'])->group(function () {
     Route::resource('pesanan', PesananController::class)->except(['index']);
     Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
 });
@@ -131,3 +133,5 @@ Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
     Route::patch('/pesanan/{id}/status', [KurirController::class, 'updateStatus'])->name('kurir.pesanan.updateStatus');
     Route::post('/pesanan/{id}/konfirmasi-bayar', [KurirController::class, 'konfirmasiBayar'])->name('kurir.pesanan.konfirmasiBayar');
 });
+Route::get('/kurir/{kurir_id}/location', [LocationController::class, 'getKurirLocation'])->name('kurir.get-location');
+

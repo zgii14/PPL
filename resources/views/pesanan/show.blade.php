@@ -42,7 +42,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label><strong>Waktu Selesai:</strong></label>
+                        <label><strong>Perkiraan Waktu Selesai:</strong></label>
                         <p>{{ $pesanan->waktu_selesai }}</p>
                     </div>
 
@@ -150,7 +150,8 @@
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
+                }
+            ).addTo(map);
 
             // Add marker for kurir only if the logged-in user is Kurir
             @if (auth()->user()->role == "kurir")
@@ -193,6 +194,12 @@
                 });
             }
 
+            // Prevent adding markers or interactions on map click
+            map.on("click", function(e) {
+                // Silently handle the click event without adding markers or showing alerts
+                console.log("Map clicked at: ", e.latlng); // Optional: Log the click position for debugging
+            });
+
             // Update location information for user
             updateLocationInfo(userPosition[0], userPosition[1]);
         });
@@ -202,7 +209,8 @@
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                 .then(response => response.json())
                 .then(data => {
-                    const locationInfo = data && data.display_name ? data.display_name :
+                    const locationInfo = data && data.display_name ?
+                        data.display_name :
                         'Location information not available';
                     document.getElementById("location-info").textContent = locationInfo;
                 })

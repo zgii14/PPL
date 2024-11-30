@@ -9,7 +9,7 @@
         <meta content="Free HTML Templates" name="description">
 
         <!-- Favicon -->
-        <link href="img/favicon.ico" rel="icon">
+        <link href="asset2/img/favicon.ico" rel="icon">
 
         <!-- Google Web Fonts -->
         <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -19,10 +19,10 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
 
         <!-- Libraries Stylesheet -->
-        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+        <link href="asset2/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
         <!-- Customized Bootstrap Stylesheet -->
-        <link href="css/style.css" rel="stylesheet">
+        <link href="asset2/css/style.css" rel="stylesheet">
     </head>
 
     <body>
@@ -76,7 +76,7 @@
                     <div class="navbar-collapse justify-content-between collapse px-3" id="navbarCollapse">
                         <div class="navbar-nav ml-auto py-0">
                             <a href="index.html" class="nav-item nav-link active">Home</a>
-                            <a href="about.html" class="nav-item nav-link">About</a>
+                            <a href="{{ route("login") }}" class="nav-item nav-link">Lugin</a>
                             <a href="service.html" class="nav-item nav-link">Services</a>
                             <a href="pricing.html" class="nav-item nav-link">Pricing</a>
                             <div class="nav-item dropdown">
@@ -99,7 +99,7 @@
             <div id="header-carousel" class="carousel slide" data-ride="carousel">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <img class="w-100" src="img/carousel-1.jpg" alt="Image">
+                        <img class="w-100" src="asset2/img/carousel-1.jpg" alt="Image">
                         <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                             <div class="p-3" style="max-width: 900px;">
                                 <h4 class="text-uppercase mb-md-3 text-white">Laundry & Dry Cleaning</h4>
@@ -109,7 +109,7 @@
                         </div>
                     </div>
                     <div class="carousel-item">
-                        <img class="w-100" src="img/carousel-2.jpg" alt="Image">
+                        <img class="w-100" src="asset2/img/carousel-2.jpg" alt="Image">
                         <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                             <div class="p-3" style="max-width: 900px;">
                                 <h4 class="text-uppercase mb-md-3 text-white">Laundry & Dry Cleaning</h4>
@@ -177,7 +177,7 @@
             <div class="pt-lg-4 container pt-0">
                 <div class="row align-items-center">
                     <div class="col-lg-5">
-                        <img class="img-fluid" src="img/about.jpg" alt="">
+                        <img class="img-fluid" src="asset2/img/about.jpg" alt="">
                     </div>
                     <div class="col-lg-7 mt-lg-0 pl-lg-5 mt-5">
                         <h6 class="text-secondary text-uppercase font-weight-medium mb-3">Learn About Us</h6>
@@ -431,7 +431,62 @@
         <!-- Pricing Plan End -->
 
         <!-- Testimonial Start -->
-   
+        <div class="container-fluid py-5">
+            <div class="container">
+                <h6 class="text-secondary text-uppercase font-weight-medium mb-3 text-center">Testimonial</h6>
+                <h1 class="display-4 mb-5 text-center">Our Clients Say</h1>
+                <div class="owl-carousel testimonial-carousel">
+                    <div class="testimonial-item">
+                        <img class="position-relative rounded-circle mx-auto bg-white shadow"
+                            src="asset2/img/testimonial-1.jpg"
+                            style="width: 100px; height: 100px; padding: 12px; margin-bottom: -50px; z-index: 1;"
+                            alt="">
+                        <div class="bg-light p-4 pt-0 text-center">
+                            <h5 class="font-weight-medium mt-5">Client Name</h5>
+                            <p class="text-muted font-italic">Profession</p>
+                            <p class="m-0">Sed ea amet kasd elitr stet, stet rebum et ipsum est duo elitr eirmod
+                                clita lorem. Dolor ipsum clita</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-item">
+                        <img class="position-relative rounded-circle mx-auto bg-white shadow"
+                            src="asset2/img/testimonial-2.jpg"
+                            style="width: 100px; height: 100px; padding: 12px; margin-bottom: -50px; z-index: 1;"
+                            alt="">
+                        <div class="bg-light p-4 pt-0 text-center">
+                            <h5 class="font-weight-medium mt-5">Client Name</h5>
+                            <p class="text-muted font-italic">Profession</p>
+                            <p class="m-0">Sed ea amet kasd elitr stet, stet rebum et ipsum est duo elitr eirmod
+                                clita lorem. Dolor ipsum clita</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-item">
+                        <img class="position-relative rounded-circle mx-auto bg-white shadow"
+                            src="asset2/img/testimonial-3.jpg"
+                            style="width: 100px; height: 100px; padding: 12px; margin-bottom: -50px; z-index: 1;"
+                            alt="">
+                        <div class="bg-light p-4 pt-0 text-center">
+                            <h5 class="font-weight-medium mt-5">Client Name</h5>
+                            <p class="text-muted font-italic">Profession</p>
+                            <p class="m-0">Sed ea amet kasd elitr stet, stet rebum et ipsum est duo elitr eirmod
+                                clita lorem. Dolor ipsum clita</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-item">
+                        <img class="position-relative rounded-circle mx-auto bg-white shadow"
+                            src="asset2/img/testimonial-4.jpg"
+                            style="width: 100px; height: 100px; padding: 12px; margin-bottom: -50px; z-index: 1;"
+                            alt="">
+                        <div class="bg-light p-4 pt-0 text-center">
+                            <h5 class="font-weight-medium mt-5">Client Name</h5>
+                            <p class="text-muted font-italic">Profession</p>
+                            <p class="m-0">Sed ea amet kasd elitr stet, stet rebum et ipsum est duo elitr eirmod
+                                clita lorem. Dolor ipsum clita</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Testimonial End -->
 
         <!-- Blog Start -->
@@ -443,7 +498,7 @@
                     <div class="col-lg-4 mb-2">
                         <div class="mb-4 shadow">
                             <div class="position-relative">
-                                <img class="img-fluid w-100" src="img/blog-1.jpg" alt="">
+                                <img class="img-fluid w-100" src="asset2/img/blog-1.jpg" alt="">
                                 <a href=""
                                     class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none p-4"
                                     style="top: 0; left: 0; background: rgba(0, 0, 0, .4);">
@@ -465,7 +520,7 @@
                     <div class="col-lg-4 mb-2">
                         <div class="mb-4 shadow">
                             <div class="position-relative">
-                                <img class="img-fluid w-100" src="img/blog-2.jpg" alt="">
+                                <img class="img-fluid w-100" src="asset2/img/blog-2.jpg" alt="">
                                 <a href=""
                                     class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none p-4"
                                     style="top: 0; left: 0; background: rgba(0, 0, 0, .4);">
@@ -487,7 +542,7 @@
                     <div class="col-lg-4 mb-2">
                         <div class="mb-4 shadow">
                             <div class="position-relative">
-                                <img class="img-fluid w-100" src="img/blog-3.jpg" alt="">
+                                <img class="img-fluid w-100" src="asset2/img/blog-3.jpg" alt="">
                                 <a href=""
                                     class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none p-4"
                                     style="top: 0; left: 0; background: rgba(0, 0, 0, .4);">
@@ -584,17 +639,17 @@
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-        <script src="lib/easing/easing.min.js"></script>
-        <script src="lib/waypoints/waypoints.min.js"></script>
-        <script src="lib/counterup/counterup.min.js"></script>
-        <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+        <script src="asset2/lib/easing/easing.min.js"></script>
+        <script src="asset2/lib/waypoints/waypoints.min.js"></script>
+        <script src="asset2/lib/counterup/counterup.min.js"></script>
+        <script src="asset2/lib/owlcarousel/owl.carousel.min.js"></script>
 
         <!-- Contact Javascript File -->
-        <script src="mail/jqBootstrapValidation.min.js"></script>
-        <script src="mail/contact.js"></script>
+        <script src="asset2/mail/jqBootstrapValidation.min.js"></script>
+        <script src="asset2/mail/contact.js"></script>
 
         <!-- Template Javascript -->
-        <script src="js/main.js"></script>
+        <script src="asset2/js/main.js"></script>
     </body>
 
 </html>

@@ -1,7 +1,7 @@
 @extends("layouts.app")
 
 @section("title")
-    lorem
+    Dashboard Laundry
 @endsection
 
 @section("content")
@@ -12,8 +12,9 @@
                 <div class="breadcrumb-item active">Dashboard</div>
             </div>
         </div>
+
         <div class="section-body">
-            <h2 class="section-title">Selamat Datang, Pemilik Laundry!</h2>
+            <h2 class="section-title">Selamat Datang, {{ auth()->user()->name }}!</h2>
             <p class="section-lead">Lihat ringkasan pesanan dan pendapatan.</p>
 
             <div class="row">
@@ -28,7 +29,7 @@
                                 <h4>Pesanan Hari Ini</h4>
                             </div>
                             <div class="card-body">
-                                25 <!-- Jumlah Pesanan (contoh) -->
+                                {{ $pesananHariIni }} <!-- Jumlah Pesanan Hari Ini -->
                             </div>
                         </div>
                     </div>
@@ -45,7 +46,7 @@
                                 <h4>Pesanan Selesai</h4>
                             </div>
                             <div class="card-body">
-                                50 <!-- Jumlah Pesanan Selesai (contoh) -->
+                                {{ $pesananSelesai }} <!-- Jumlah Pesanan Selesai -->
                             </div>
                         </div>
                     </div>
@@ -55,14 +56,14 @@
                 <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                     <div class="card card-statistic-1">
                         <div class="card-icon bg-warning">
-                            <i class="fas fa-dollar-sign"></i>
+                            <i class="fas fa-money-bill-wave"></i> <!-- Optional icon change -->
                         </div>
                         <div class="card-wrap">
                             <div class="card-header">
                                 <h4>Pendapatan Bulanan</h4>
                             </div>
                             <div class="card-body">
-                                Rp 5.000.000 <!-- Total Pendapatan (contoh) -->
+                                Rp {{ number_format($pendapatanBulanan, 0, ",", ".") }} <!-- Changed $ to Rp -->
                             </div>
                         </div>
                     </div>
@@ -88,19 +89,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John Doe</td>
-                                        <td><span class="badge badge-success">Selesai</span></td>
-                                        <td>2024-11-17</td>
-                                        <td>Rp 50,000</td>
-                                    </tr>
-                                    <!-- Tambahkan data lainnya -->
+                                    @foreach ($latestPesanan as $item)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $item->user->name }}</td>
+                                            <td>
+                                                <span
+                                                    class="badge @if ($item->status == 6) badge-success
+                                                    @elseif($item->status == 5) badge-warning
+                                                    @elseif($item->status == 4) badge-info
+                                                    @elseif($item->status == 3) badge-primary
+                                                    @elseif($item->status == 2) badge-secondary
+                                                    @elseif($item->status == 1) badge-danger
+                                                    @else badge-dark @endif">
+                                                    {{ $item->status == 6 ? "Selesai" : ($item->status == 5 ? "Diantar" : ($item->status == 4 ? "Lipat" : ($item->status == 3 ? "Kering" : ($item->status == 2 ? "Cuci" : "Dijemput")))) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $item->created_at->format("Y-m-d") }}</td>
+                                            <td>Rp {{ number_format($item->total_harga, 0, ",", ".") }}</td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Pagination for Latest Orders -->
+            <div class="card-footer d-flex justify-content-center">
+                {{ $latestPesanan->links() }}
             </div>
         </div>
     </section>

@@ -49,5 +49,10 @@ class User extends Authenticatable
     const ROLE_STAFF = 'staff';
     const ROLE_PELANGGAN = 'pelanggan';
     const ROLE_KURIR = 'kurir';
+// app/Models/User.php
+public function location()
+{
+    return $this->hasOne(Location::class);
+}
 
 }

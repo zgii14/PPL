@@ -105,33 +105,69 @@
                                                         <td class="text-center">Rp
                                                             {{ number_format($item->total_harga, 0, ",", ".") }}</td>
                                                         <td class="text-center">
-                                                            <form action="{{ route("pesanan.update-status", $item->id) }}"
-                                                                method="POST" class="d-inline">
-                                                                @csrf
-                                                                @method("PATCH")
-                                                                <select name="status" class="form-control form-control-lg"
-                                                                    style="width: 100%; max-width: 200px;"
-                                                                    onchange="this.form.submit()">
-                                                                    <option value="1"
-                                                                        {{ $item->status == 1 ? "selected" : "" }}
-                                                                        class="status-dijemput">Dijemput</option>
-                                                                    <option value="2"
-                                                                        {{ $item->status == 2 ? "selected" : "" }}>Cuci
-                                                                    </option>
-                                                                    <option value="3"
-                                                                        {{ $item->status == 3 ? "selected" : "" }}>Kering
-                                                                    </option>
-                                                                    <option value="4"
-                                                                        {{ $item->status == 4 ? "selected" : "" }}>Lipat
-                                                                    </option>
-                                                                    <option value="5"
-                                                                        {{ $item->status == 5 ? "selected" : "" }}
-                                                                        class="status-diantar">Diantar</option>
-                                                                    <option value="6"
-                                                                        {{ $item->status == 6 ? "selected" : "" }}>Selesai
-                                                                    </option>
-                                                                </select>
-                                                            </form>
+                                                            @if (auth()->user()->role === "pelanggan")
+                                                                <!-- Show fixed status for Pelanggan -->
+                                                                @switch($item->status)
+                                                                    @case(1)
+                                                                        <span class="badge badge-info">Dijemput</span>
+                                                                    @break
+
+                                                                    @case(2)
+                                                                        <span class="badge badge-primary">Cuci</span>
+                                                                    @break
+
+                                                                    @case(3)
+                                                                        <span class="badge badge-warning">Kering</span>
+                                                                    @break
+
+                                                                    @case(4)
+                                                                        <span class="badge badge-secondary">Lipat</span>
+                                                                    @break
+
+                                                                    @case(5)
+                                                                        <span class="badge badge-success">Diantar</span>
+                                                                    @break
+
+                                                                    @case(6)
+                                                                        <span class="badge badge-success">Selesai</span>
+                                                                    @break
+
+                                                                    @default
+                                                                        <span class="badge badge-light">Status Tidak
+                                                                            Diketahui</span>
+                                                                @endswitch
+                                                            @else
+                                                                <!-- Render status dropdown for other roles -->
+                                                                <form
+                                                                    action="{{ route("pesanan.update-status", $item->id) }}"
+                                                                    method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    @method("PATCH")
+                                                                    <select name="status"
+                                                                        class="form-control form-control-lg"
+                                                                        style="width: 100%; max-width: 200px;"
+                                                                        onchange="this.form.submit()">
+                                                                        <option value="1"
+                                                                            {{ $item->status == 1 ? "selected" : "" }}
+                                                                            class="status-dijemput">Dijemput</option>
+                                                                        <option value="2"
+                                                                            {{ $item->status == 2 ? "selected" : "" }}>Cuci
+                                                                        </option>
+                                                                        <option value="3"
+                                                                            {{ $item->status == 3 ? "selected" : "" }}>
+                                                                            Kering</option>
+                                                                        <option value="4"
+                                                                            {{ $item->status == 4 ? "selected" : "" }}>
+                                                                            Lipat</option>
+                                                                        <option value="5"
+                                                                            {{ $item->status == 5 ? "selected" : "" }}
+                                                                            class="status-diantar">Diantar</option>
+                                                                        <option value="6"
+                                                                            {{ $item->status == 6 ? "selected" : "" }}>
+                                                                            Selesai</option>
+                                                                    </select>
+                                                                </form>
+                                                            @endif
                                                         </td>
 
                                                         <td class="text-center">
@@ -145,11 +181,14 @@
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
 
-                                                                <!-- Tambahkan tombol Tampilkan Rute -->
-                                                                <a href="{{ route("pesanan.show", $item->id) }}#tampilkan-rute"
-                                                                    class="btn btn-primary btn-sm" title="Tampilkan Rute">
-                                                                    <i class="fas fa-route"></i>
-                                                                </a>
+                                                                @if (auth()->user()->role == "kurir")
+                                                                    <!-- Tampilkan Rute Button for Kurir -->
+                                                                    <a href="{{ route("pesanan.show", $item->id) }}#tampilkan-rute"
+                                                                        class="btn btn-primary btn-sm"
+                                                                        title="Tampilkan Rute">
+                                                                        <i class="fas fa-route"></i>
+                                                                    </a>
+                                                                @endif
 
                                                                 @if (auth()->user()->role == "staff")
                                                                     <a href="{{ route("pesanan.edit", $item->id) }}"
@@ -161,8 +200,8 @@
                                                                         method="POST" class="delete-form d-inline">
                                                                         @csrf
                                                                         @method("DELETE")
-                                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                                            title="Hapus">
+                                                                        <button type="submit"
+                                                                            class="btn btn-danger btn-sm" title="Hapus">
                                                                             <i class="fas fa-trash"></i>
                                                                         </button>
                                                                     </form>

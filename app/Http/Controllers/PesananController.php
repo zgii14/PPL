@@ -14,42 +14,53 @@ class PesananController extends Controller
 {
     // Menampilkan daftar pesanan
     public function index()
-    {
-        // Check if the user is an admin
-        $userRole = auth()->user()->role;
-    
-        if ($userRole === 'admin') {
-            // Get only completed orders (status 6) with successful payments (status 'berhasil')
-            $pesanan = Pesanan::with(['paket', 'user'])
-                ->where('status', 6)  // Only completed orders
-                ->whereHas('pembayaran', function ($query) {
-                    $query->where('status', 'berhasil');  // Only successful payments
-                })
-                ->paginate(10);
-        } else {
-            // If the user is not an admin, we can either throw an exception or show a different set of orders
-            $pesanan = Pesanan::with(['paket', 'user'])->paginate(10);  // Modify this line as per your needs
-        }
-    
-        return view('pesanan.index', compact('pesanan'));
+{
+    $userRole = auth()->user()->role;
+
+    // If the user is an admin
+    if ($userRole === 'admin') {
+        // Get only completed orders (status 6) with successful payments (status 'berhasil')
+        $pesanan = Pesanan::with(['paket', 'user'])
+            ->where('status', 6) // Only completed orders
+            ->whereHas('pembayaran', function ($query) {
+                $query->where('status', 'berhasil'); // Only successful payments
+            })
+            ->paginate(10);
+    } elseif ($userRole === 'staff' || $userRole === 'kurir') {
+        // If the user is a staff or kurir, they can see all orders
+        $pesanan = Pesanan::with(['paket', 'user'])
+            ->paginate(10); // Get all orders
+    } else {
+        // If the user is not admin, staff, or kurir, show only their own orders
+        $pesanan = Pesanan::with(['paket', 'user'])
+            ->where('user_id', auth()->id()) // Only orders that belong to the logged-in user
+            ->paginate(10);
     }
-    
+
+    return view('pesanan.index', compact('pesanan'));
+}
+
+
+
 
     // Menampilkan form pembuatan pesanan
     public function create()
-    {
-        
-        $paket = PaketLaundry::all();
-        $users = User::all();
-        return view('pesanan.create', compact('paket', 'users'));
+{
+    // Fetch all available packages
+    $paket = PaketLaundry::all();
 
-        if (auth()->user()->role === 'kurir') {
-            abort(403, 'Kurir tidak diizinkan untuk membuat pesanan.');
-        }
-    
-        // Render create view for allowed roles
-        return view('pesanan.create');
+    // Fetch users excluding admin, staff, and kurir roles
+    $users = User::whereNotIn('role', ['admin', 'staff', 'kurir'])->get();
+
+    // If the logged-in user is a kurir, deny access to the create page
+    if (auth()->user()->role === 'kurir') {
+        abort(403, 'Kurir tidak diizinkan untuk membuat pesanan.');
     }
+
+    // Render the create view with the available packages and users
+    return view('pesanan.create', compact('paket', 'users'));
+}
+
 
     // Menyimpan pesanan ke database
     public function store(Request $request)
@@ -186,44 +197,69 @@ class PesananController extends Controller
     }
 
     // Update Status Pesanan (Berpindah ke Status Berikutnya)
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:1,2,3,4,5,6',
-        ]);
-    
-        $pesanan = Pesanan::findOrFail($id);
-    
-        // Periksa role pengguna yang sedang login
-        $userRole = auth()->user()->role;
-    
-        if ($userRole === 'kurir') {
-            // Kurir hanya dapat mengubah status ke 1 atau 5
-            if (!in_array($request->status, [1, 5])) {
-                return redirect()->back()->with(
-                    'error',
-                    'Anda adalah kurir. Anda hanya dapat mengubah status ke Penjemputan  atau Pengantaran.'
-                );
-            }
-        } elseif ($userRole !== 'staff') {
-            // Role lain selain 'staff' tidak diizinkan mengubah status
+   // Update Status Pesanan (Berpindah ke Status Berikutnya)
+   public function updateStatus(Request $request, $id)
+{
+    // Validasi status yang diminta
+    $request->validate([
+        'status' => 'required|in:1,5,6', // Kurir hanya bisa memilih 1 (Penjemputan) atau 5 (Pengantaran), staff bisa memilih 1, 5, atau 6 (Selesai)
+    ]);
+
+    // Temukan pesanan berdasarkan ID
+    $pesanan = Pesanan::findOrFail($id);
+
+    // Mendapatkan role dari pengguna yang sedang login
+    $userRole = auth()->user()->role;
+
+    // Cek jika user adalah kurir (courier)
+    if ($userRole === 'kurir') {
+        // Jika pesanan sudah selesai (status 6), kurir tidak bisa mengubah status
+        if ($pesanan->status == 6) {
             return redirect()->back()->with(
                 'error',
-                'Akses ditolak. Hanya staf yang diizinkan untuk mengubah ke status selain Penjemputan dan Pengantaran.'
+                'Pesanan sudah selesai. Status tidak dapat diubah oleh kurir.'
             );
         }
-    
-        // Staf dapat mengubah ke semua status, sehingga tidak ada pembatasan di sini
-    
-        // Jika validasi lolos, simpan perubahan
-        $pesanan->status = $request->status;
-        $pesanan->save();
-    
-        return redirect()->route('pesanan.index')->with(
-            'success',
-            'Status pesanan berhasil diperbarui menjadi ' . $this->getStatusName($pesanan->status) . '.'
-        );
+
+        // Kurir hanya bisa mengubah status dari Penjemputan (1) ke Pengantaran (5) dan sebaliknya
+        if ($pesanan->status == 1 && $request->status != 5) {
+            return redirect()->back()->with(
+                'error',
+                'Kurir hanya dapat mengubah status dari Penjemputan ke Pengantaran.'
+            );
+        }
+
+        if ($pesanan->status == 5 && $request->status != 1) {
+            return redirect()->back()->with(
+                'error',
+                'Kurir hanya dapat mengubah status dari Pengantaran ke Penjemputan.'
+            );
+        }
     }
+
+    // Jika pengguna adalah staff atau admin, mereka bisa mengubah status ke status lain
+    if ($userRole === 'staff' || $userRole === 'admin') {
+        // Staff dan admin bisa mengubah status, termasuk ke status Selesai (6)
+        if ($pesanan->status == 6 && $request->status == 6) {
+            return redirect()->back()->with(
+                'error',
+                'Status pesanan sudah selesai. Staff tidak dapat mengubah status ke Selesai lagi.'
+            );
+        }
+    }
+
+    // Update status pesanan dengan status baru
+    $pesanan->status = $request->status;
+    $pesanan->save();
+
+    return redirect()->route('pesanan.index')->with(
+        'success',
+        'Status pesanan berhasil diperbarui menjadi ' . $this->getStatusName($pesanan->status) . '.'
+    );
+}
+
+   
+
     
     /**
      * Helper untuk mendapatkan nama status berdasarkan kode status
@@ -324,5 +360,19 @@ class PesananController extends Controller
     // Unduh PDF dengan nama file sesuai ID pesanan
    return $pdf->stream("struk-pesanan-{$pesanan->id}.pdf");
 }
-    
+// In PesananController.php
+// In PesananController.php
+public function dashboard()
+{
+    $pesananHariIni = Pesanan::whereDate('created_at', now()->toDateString())->count(); // Today's orders
+    $pesananSelesai = Pesanan::where('status', 6)->count(); // Completed orders
+    $pendapatanBulanan = Pesanan::whereMonth('created_at', now()->month)->sum('total_harga'); // Monthly earnings
+
+    // Paginate the latest 5 orders
+    $latestPesanan = Pesanan::latest()->paginate(5); // Paginate the latest 5 orders
+
+    return view('dashboard', compact('pesananHariIni', 'pesananSelesai', 'pendapatanBulanan', 'latestPesanan'));
+}
+
+
 }

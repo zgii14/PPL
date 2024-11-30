@@ -30,47 +30,70 @@
                             @enderror
                         </div>
 
-                        <!-- Tipe Pelanggan -->
-                        <div class="mb-3">
-                            <label for="tipe" class="form-label">Tipe Pelanggan</label>
-                            <select name="tipe" id="tipe" class="form-control @error("tipe") is-invalid @enderror"
-                                onchange="toggleUserForm()">
-                                <option value="select" {{ old("tipe") == "select" ? "selected" : "" }}>Pilih Pelanggan
-                                </option>
-                                <option value="create" {{ old("tipe") == "create" ? "selected" : "" }}>Buat Pelanggan Baru
-                                </option>
-                            </select>
-                            @error("tipe")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Tipe Pelanggan (This part will only show for Admins, not for regular users) -->
+                        @if (auth()->user()->role !== "pelanggan")
+                            <div class="mb-3">
+                                <label for="tipe" class="form-label">Tipe Pelanggan</label>
+                                <select name="tipe" id="tipe"
+                                    class="form-control @error("tipe") is-invalid @enderror" onchange="toggleUserForm()">
+                                    <option value="select" {{ old("tipe") == "select" ? "selected" : "" }}>Pilih Pelanggan
+                                    </option>
+                                    <option value="create" {{ old("tipe") == "create" ? "selected" : "" }}>Buat Pelanggan
+                                        Baru</option>
+                                </select>
+                                @error("tipe")
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endif
 
-                        <!-- Select Existing User -->
-                        <div id="user_select" class="mb-3" style="display:none;">
-                            <label for="user_id" class="form-label">Nama Pelanggan</label>
-                            <select name="user_id" id="user_id"
-                                class="form-control @error("user_id") is-invalid @enderror">
-                                <option value="">Pilih Pelanggan</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}"
-                                        {{ old("user_id") == $user->id ? "selected" : "" }}>{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                            @error("user_id")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Select Existing User (Only visible if user is not a regular user) -->
+                        @if (auth()->user()->role !== "pelanggan")
+                            <div id="user_select" class="mb-3" style="display:none;">
+                                <label for="user_id" class="form-label">Nama Pelanggan</label>
+                                <select name="user_id" id="user_id"
+                                    class="form-control @error("user_id") is-invalid @enderror">
+                                    <option value="">Pilih Pelanggan</option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ old("user_id") == $user->id ? "selected" : "" }}>{{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error("user_id")
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                        <!-- Input New User -->
-                        <div id="user_create" class="mb-3" style="display:none;">
-                            <label for="new_user_name" class="form-label">Nama Pelanggan Baru</label>
-                            <input type="text" name="new_user_name" id="new_user_name"
-                                class="form-control @error("new_user_name") is-invalid @enderror"
-                                placeholder="Masukkan Nama Pelanggan Baru" value="{{ old("new_user_name") }}">
-                            @error("new_user_name")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                            <!-- Input New User -->
+                            <div id="user_create" class="mb-3" style="display:none;">
+                                <label for="new_user_name" class="form-label">Nama Pelanggan Baru</label>
+                                <input type="text" name="new_user_name" id="new_user_name"
+                                    class="form-control @error("new_user_name") is-invalid @enderror"
+                                    placeholder="Masukkan Nama Pelanggan Baru" value="{{ old("new_user_name") }}">
+                                @error("new_user_name")
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @else
+                            <!-- Automatically select the logged-in user if the role is 'pelanggan' -->
+                            <div id="user_select" class="mb-3">
+                                <label for="user_id" class="form-label">Nama Pelanggan</label>
+                                <select name="user_id" id="user_id"
+                                    class="form-control @error("user_id") is-invalid @enderror" disabled>
+                                    <option value="{{ auth()->user()->id }}" selected>{{ auth()->user()->name }}</option>
+                                </select>
+                                @error("user_id")
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Hidden user_id field for regular users -->
+                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+
+                            <!-- Automatically set tipe for pelanggan -->
+                            <input type="hidden" name="tipe" value="select">
+                        @endif
 
                         <!-- Quantity -->
                         <div class="mb-3">
@@ -109,6 +132,18 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <script>
+        // Update total weight based on jumlah baju and celana
+        function updateWeight() {
+            var jumlahBaju = document.getElementById('jumlah_baju').value || 0;
+            var jumlahCelana = document.getElementById('jumlah_celana').value || 0;
+
+            // 0.3 kg per baju, 0.35 kg per celana
+            var beratBaju = jumlahBaju * 0.3;
+            var beratCelana = jumlahCelana * 0.35;
+
+            var totalBerat = beratBaju + beratCelana;
+            document.getElementById('total_berat').value = totalBerat.toFixed(2) + ' kg';
+        }
         // Toggle function for showing the user selection or new user creation form
         function toggleUserForm() {
             var tipe = document.getElementById('tipe').value;

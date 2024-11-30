@@ -16,6 +16,7 @@
                         @csrf
                         @method("PUT")
 
+                        <!-- Paket Laundry -->
                         <div class="mb-3">
                             <label for="paket_id" class="form-label">Paket Laundry</label>
                             <select name="paket_id" id="paket_id"
@@ -32,7 +33,7 @@
                             @enderror
                         </div>
 
-                        <!-- Input untuk memilih pelanggan (user_id) -->
+                        <!-- Pelanggan -->
                         <div class="mb-3">
                             <label for="user_id" class="form-label">Nama Pelanggan</label>
                             <select name="user_id" id="user_id"
@@ -50,6 +51,7 @@
                             @enderror
                         </div>
 
+                        <!-- Jumlah -->
                         <div class="mb-3">
                             <label for="jumlah" class="form-label">Jumlah</label>
                             <input type="number" name="jumlah" class="form-control @error("jumlah") is-invalid @enderror"
@@ -59,16 +61,17 @@
                             @enderror
                         </div>
 
-                        <!-- Map Integration -->
+                        <!-- Lokasi (Map) -->
                         <div class="mb-3">
                             <label for="location" class="form-label">Pilih Lokasi</label>
                             <div id="map" style="height: 300px; width: 100%;"></div>
                             <input type="hidden" id="latitude" name="latitude" value="{{ $pesanan->latitude }}">
                             <input type="hidden" id="longitude" name="longitude" value="{{ $pesanan->longitude }}">
-                            <p><strong>Location Information:</strong> <span id="location-info"></span></p>
+                            <p><strong>Lokasi Terkini:</strong> <span id="location-info"></span></p>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
                     </form>
                 </div>
             </div>
@@ -76,44 +79,66 @@
     </section>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const initialPosition = [
-        {{ $pesanan->latitude / 1000000 }},
-        {{ $pesanan->longitude / 1000000 }}
-    ];
-            const map = L.map('map').setView(initialPosition, 13);
+            const initialLat = parseFloat(document.getElementById('latitude').value) || -3.7889;
+            const initialLng = parseFloat(document.getElementById('longitude').value) || 102.2655;
 
-            L.tileLayer(
-                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="https://www.esri.com">Esri</a>, Earthstar Geographics'
-                }).addTo(map);
+            const map = L.map('map').setView([initialLat, initialLng], 13);
 
-            const marker = L.marker(initialPosition, { draggable: true }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-            marker.on('dragend', function(e) {
-                const { lat, lng } = marker.getLatLng();
-                document.getElementById("latitude").value = lat;
-                document.getElementById("longitude").value = lng;
+            L.Control.geocoder().addTo(map);
+
+            const destinationMarker = L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(map);
+
+            function updateLocationInfo(lat, lng) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const locationInfo = data?.display_name || 'Location information not available';
+                        document.getElementById("location-info").textContent = locationInfo;
+                    })
+                    .catch(err => {
+                        console.error("Error fetching location info:", err);
+                        document.getElementById("location-info").textContent =
+                            'Error fetching location information';
+                    });
+            }
+
+            destinationMarker.on('dragend', function(e) {
+                const {
+                    lat,
+                    lng
+                } = destinationMarker.getLatLng();
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+                updateLocationInfo(lat, lng);
             });
 
             map.on('click', function(e) {
-                const { lat, lng } = e.latlng;
-                marker.setLatLng(e.latlng);
-                document.getElementById("latitude").value = lat;
-                document.getElementById("longitude").value = lng;
+                const {
+                    lat,
+                    lng
+                } = e.latlng;
+                destinationMarker.setLatLng([lat, lng]);
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+                updateLocationInfo(lat, lng);
             });
+
+            updateLocationInfo(initialLat, initialLng);
         });
     </script>
 @endsection
 
 @push("css")
-    <!-- Include Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-    <!-- Include Leaflet Control Geocoder CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 @endpush
