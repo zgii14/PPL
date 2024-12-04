@@ -7,16 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class Pesanan extends Model
 {
     protected $table = 'pesanan'; // Nama tabel di database
-    protected $fillable = [
-        'user_id',
-        'paket_id',
-        'jumlah',
-        'total_harga',
-        'status',
-        'latitude',   // Added latitude
-        'longitude'   // Added longitude
-    ]; // Kolom yang dapat diisi
+    
+        protected $fillable = [
+            'paket_id', 'user_id', 'jumlah', 'total_harga', 'status', 'latitude', 'longitude', 'keterangan',
+        ];
+    
+        // Alternatively, you can add a cast if needed:
+        protected $casts = [
+            'keterangan' => 'string',
+        ];
 
+      // Added longitude
+    
     // Relasi ke model PaketLaundry
     public function paket()
     {

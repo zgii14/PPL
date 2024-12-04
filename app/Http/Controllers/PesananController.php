@@ -8,8 +8,9 @@ use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
-use Illuminate\Support\Facades\Log;
-
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Carbon\Carbon;
 class PesananController extends Controller
 {
     // Menampilkan daftar pesanan
@@ -17,26 +18,33 @@ class PesananController extends Controller
 {
     $userRole = auth()->user()->role;
 
-    // If the user is an admin
+    // Jika yang mengakses adalah admin
     if ($userRole === 'admin') {
-        // Get only completed orders (status 6) with successful payments (status 'berhasil')
+        // Admin bisa melihat semua pesanan yang sudah selesai (status 6) dan pembayaran berhasil
         $pesanan = Pesanan::with(['paket', 'user'])
-            ->where('status', 6) // Only completed orders
+            ->where('status', 6) // Hanya pesanan yang sudah selesai
             ->whereHas('pembayaran', function ($query) {
-                $query->where('status', 'berhasil'); // Only successful payments
+                $query->where('status', 'berhasil'); // Hanya pembayaran yang berhasil
             })
+            ->where('keterangan', '!=', 'Diambil Sendiri') // Exclude pesanan dengan keterangan "Diambil Sendiri"
             ->paginate(10);
-    } elseif ($userRole === 'staff' || $userRole === 'kurir') {
-        // If the user is a staff or kurir, they can see all orders
+    } elseif ($userRole === 'staff') {
+        // Jika yang mengakses adalah staff, bisa melihat semua pesanan dengan keterangan apapun
         $pesanan = Pesanan::with(['paket', 'user'])
-            ->paginate(10); // Get all orders
+            ->paginate(10); // Staff dapat melihat semua pesanan tanpa batasan keterangan
+    } elseif ($userRole === 'kurir') {
+        // Jika yang mengakses adalah kurir, hanya bisa melihat pesanan yang tidak memiliki keterangan "Diambil Sendiri"
+        $pesanan = Pesanan::with(['paket', 'user'])
+            ->where('keterangan', '!=', 'Diambil Sendiri') // Exclude pesanan dengan keterangan "Diambil Sendiri"
+            ->paginate(10); // Pesanan selain "Diambil Sendiri"
     } else {
-        // If the user is not admin, staff, or kurir, show only their own orders
+        // Untuk selain admin, staff, atau kurir, hanya bisa melihat pesanan mereka sendiri
         $pesanan = Pesanan::with(['paket', 'user'])
-            ->where('user_id', auth()->id()) // Only orders that belong to the logged-in user
-            ->paginate(10);
+            ->where('user_id', auth()->id()) // Pesanan milik pengguna yang login
+            ->paginate(10); // Pesanan milik user yang login
     }
 
+    // Mengirimkan data pesanan ke tampilan (view)
     return view('pesanan.index', compact('pesanan'));
 }
 
@@ -65,77 +73,83 @@ class PesananController extends Controller
     // Menyimpan pesanan ke database
     public function store(Request $request)
     {
+        // Validasi awal untuk tipe form
         $request->validate([
             'tipe' => 'required|in:select,create', // Validate tipe (either select or create)
         ]);
-
+    
+        // Validasi berdasarkan tipe (select atau create)
         if ($request->tipe == 'select') {
-            // Validate the user selection
+            // Validasi untuk pemilihan user yang sudah ada
             $request->validate([
                 'user_id' => 'required|exists:users,id',
             ]);
         } elseif ($request->tipe == 'create') {
-            // Validate the new user form
+            // Validasi untuk form pembuatan user baru
             $request->validate([
                 'new_user_name' => 'required|alpha_num|unique:users,name',
-              'latitude' => 'required|numeric|between:-90,90',
-    'longitude' => 'required|numeric|between:-180,180',
+                'latitude' => 'required|numeric|between:-90,90',
+                'longitude' => 'required|numeric|between:-180,180',
             ]);
         }
-
+    
+        // Validasi untuk data pesanan
         $request->validate([
             'paket_id' => 'required|exists:paket_laundry,id',
             'jumlah' => 'required|integer|min:1',
+            'keterangan' => 'required|in:Diantar,Diambil,Diambil Sendiri', // Validasi untuk keterangan (Dijemput/Diambil)
         ]);
-
-        // Handle creation of user or use selected user based on tipe
+    
+        // Handle pembuatan user baru atau penggunaan user yang dipilih
         if ($request->tipe == 'create') {
-            // Sanitize the new user name
+            // Menyaring nama user yang baru
             $sanitized_user_name = preg_replace('/[^a-zA-Z0-9_]/', '', $request->new_user_name);
-
-            // Create new user
+    
+            // Membuat user baru
             $user = User::create([
                 'name' => $sanitized_user_name,
-                'email' => strtolower($sanitized_user_name) . '@lubis.com', // Generate email from name
-                'password' => bcrypt($sanitized_user_name), // Set a default password
+                'email' => strtolower($sanitized_user_name) . '@lubis.com', // Email dihasilkan dari nama
+                'password' => bcrypt($sanitized_user_name), // Password default
             ]);
         } else {
-            // Use the selected existing user
+            // Menggunakan user yang sudah ada
             $user = User::findOrFail($request->user_id);
         }
+    
+        // Cek apakah role user adalah kurir, jika ya, batalkan dan kirimkan error
         if (auth()->user()->role === 'kurir') {
             abort(403, 'Kurir tidak diizinkan untuk membuat pesanan.');
         }
     
-        // Find the selected laundry package
+        // Menemukan paket laundry yang dipilih
         $paket = PaketLaundry::findOrFail($request->paket_id);
-
-        // Create the order (Pesanan)
+    
+        // Membuat pesanan
         $pesanan = Pesanan::create([
             'paket_id' => $request->paket_id,
-            'user_id' => $user->id, // Use the user ID (either existing or newly created)
+            'user_id' => $user->id, // Menggunakan ID user (yang sudah ada atau baru)
             'jumlah' => $request->jumlah,
-            'total_harga' => $paket->harga * $request->jumlah, // Calculate total price
-            'status' => 0, // Initial status: Pending
-            'latitude' => $request->latitude * 1000000, // Store as microdegrees
-            'longitude' => $request->longitude * 1000000, // Store as microdegrees
+            'total_harga' => $paket->harga * $request->jumlah, // Menghitung harga total
+            'status' => 0, // Status awal: Pending
+            'latitude' => $request->latitude * 1000000, // Menyimpan dalam mikro-derajat
+            'longitude' => $request->longitude * 1000000, // Menyimpan dalam mikro-derajat
+            'keterangan' => $request->keterangan, // Menyimpan keterangan yang dipilih (Dijemput atau Diambil)
         ]);
-
-        // Create payment record
+    
+        // Membuat record pembayaran
         Pembayaran::firstOrCreate([
             'pesanan_id' => $pesanan->id,
-            'status' => 'proses', // Assuming the default payment status is 'proses'
+            'status' => 'proses', // Status pembayaran default
         ], [
-            'nominal' => $pesanan->total_harga,  // Set nominal as total price from Pesanan
-            'metode_pembayaran' => null, // Assuming 'transfer' as default method, you can customize
-            'bukti_bayar' => null, // Initially no proof of payment, can be updated later
+            'nominal' => $pesanan->total_harga,  // Menetapkan nominal pembayaran berdasarkan harga pesanan
+            'metode_pembayaran' => null, // Metode pembayaran (bisa disesuaikan nanti)
+            'bukti_bayar' => null, // Bukti bayar (kosongkan pada awalnya)
         ]);
-
-        // Redirect back to the order list with a success message
+    
+        // Redirect ke halaman daftar pesanan dengan pesan sukses
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat.');
     }
-
-    public function show($id)
+        public function show($id)
     {
         // Mengambil data pesanan beserta paket dan user terkait
         $pesanan = Pesanan::with(['paket', 'user'])->findOrFail($id);
@@ -159,34 +173,33 @@ class PesananController extends Controller
 
     // Memperbarui pesanan
     public function update(Request $request, $id)
-    {
-        // Validate the request inputs
-        $request->validate([
-            'paket_id' => 'required|exists:paket_laundry,id',
-            'jumlah' => 'required|integer|min:1',
-            'user_id' => 'required|exists:users,id',
-            'latitude' => 'required|numeric|between:-90,90', // Ensure latitude is within valid range
-            'longitude' => 'required|numeric|between:-180,180', // Ensure longitude is within valid range
-        ]);
-    
-        // Find the existing order (Pesanan) and related laundry package (Paket)
-        $pesanan = Pesanan::findOrFail($id);
-        $paket = PaketLaundry::findOrFail($request->paket_id);
-    
-        // Update the order (Pesanan) with new data
-        $pesanan->update([
-            'paket_id' => $request->paket_id,
-            'user_id' => $request->user_id,
-            'jumlah' => $request->jumlah,
-            'total_harga' => $paket->harga * $request->jumlah, // Recalculate total price
-            'latitude' => round($request->latitude * 1000000), // Convert to microdegrees
-            'longitude' => round($request->longitude * 1000000), // Convert to microdegrees
-        ]);
-    
-        // Redirect back to the list with a success message
-        return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diperbarui.');
-    }
-    
+{
+    $request->validate([
+        'paket_id' => 'required|exists:paket_laundry,id',
+        'jumlah' => 'required|integer|min:1',
+        'user_id' => 'required|exists:users,id',
+        'latitude' => 'required|numeric|between:-90,90',
+        'longitude' => 'required|numeric|between:-180,180',
+        'keterangan' => 'required|in:Diantar,Diambil', // Validasi untuk keterangan
+    ]);
+
+    $pesanan = Pesanan::findOrFail($id);
+    $paket = PaketLaundry::findOrFail($request->paket_id);
+
+    // Update pesanan with new data including 'keterangan'
+    $pesanan->update([
+        'paket_id' => $request->paket_id,
+        'user_id' => $request->user_id,
+        'jumlah' => $request->jumlah,
+        'total_harga' => $paket->harga * $request->jumlah,
+        'latitude' => round($request->latitude * 1000000),
+        'longitude' => round($request->longitude * 1000000),
+        'keterangan' => $request->keterangan, // Update keterangan
+    ]);
+
+    return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diperbarui.');
+}
+
 
     // Menghapus pesanan
     public function destroy($id)
@@ -202,7 +215,7 @@ class PesananController extends Controller
 {
     // Validasi status yang diminta
     $request->validate([
-        'status' => 'required|in:1,5,6', // Kurir hanya bisa memilih 1 (Penjemputan) atau 5 (Pengantaran), staff bisa memilih 1, 5, atau 6 (Selesai)
+        'status' => 'required|in:1,2,3,4,5,6', // All possible statuses
     ]);
 
     // Temukan pesanan berdasarkan ID
@@ -211,9 +224,8 @@ class PesananController extends Controller
     // Mendapatkan role dari pengguna yang sedang login
     $userRole = auth()->user()->role;
 
-    // Cek jika user adalah kurir (courier)
     if ($userRole === 'kurir') {
-        // Jika pesanan sudah selesai (status 6), kurir tidak bisa mengubah status
+        // Rules for Kurir
         if ($pesanan->status == 6) {
             return redirect()->back()->with(
                 'error',
@@ -221,29 +233,22 @@ class PesananController extends Controller
             );
         }
 
-        // Kurir hanya bisa mengubah status dari Penjemputan (1) ke Pengantaran (5) dan sebaliknya
-        if ($pesanan->status == 1 && $request->status != 5) {
+        if (($pesanan->status == 2 && $request->status != 5) ||
+            ($pesanan->status == 5 && $request->status != 2)) {
             return redirect()->back()->with(
                 'error',
-                'Kurir hanya dapat mengubah status dari Penjemputan ke Pengantaran.'
+                'Kurir hanya dapat mengubah status antara Penjemputan dan Pengantaran.'
             );
         }
-
-        if ($pesanan->status == 5 && $request->status != 1) {
-            return redirect()->back()->with(
-                'error',
-                'Kurir hanya dapat mengubah status dari Pengantaran ke Penjemputan.'
-            );
-        }
-    }
-
-    // Jika pengguna adalah staff atau admin, mereka bisa mengubah status ke status lain
-    if ($userRole === 'staff' || $userRole === 'admin') {
-        // Staff dan admin bisa mengubah status, termasuk ke status Selesai (6)
+    } elseif ($userRole === 'staff') {
+        // Rules for Staff: Allow staff to change status to any status
+        // No additional validation is needed for staff.
+    } elseif ($userRole === 'admin') {
+        // Admin rules can stay the same (or implement specific admin logic if needed)
         if ($pesanan->status == 6 && $request->status == 6) {
             return redirect()->back()->with(
                 'error',
-                'Status pesanan sudah selesai. Staff tidak dapat mengubah status ke Selesai lagi.'
+                'Status pesanan sudah selesai. Admin tidak dapat mengubah status ke Selesai lagi.'
             );
         }
     }
@@ -267,11 +272,11 @@ class PesananController extends Controller
     protected function getStatusName($status)
     {
         $statusNames = [
-            1 => 'Penjemputan',
-            2 => 'Cuci',
-            3 => 'Kering',
+            1 => 'Proses',
+            2 => 'Dijemput',
+            3 => 'Cuci',
             4 => 'Lipat',
-            5 => 'Pengantaran',
+            5 => 'Diantar',
             6 => 'Selesai',
         ];
     
@@ -350,7 +355,7 @@ class PesananController extends Controller
         return redirect()->back()->with('error', 'Status pesanan sudah pada tahap awal, tidak dapat dikurangi.');
     }
     public function cetakPdf($id)
-{
+    {
     // Ambil data pesanan berdasarkan ID
     $pesanan = Pesanan::with('paket')->findOrFail($id);
 
@@ -360,19 +365,135 @@ class PesananController extends Controller
     // Unduh PDF dengan nama file sesuai ID pesanan
    return $pdf->stream("struk-pesanan-{$pesanan->id}.pdf");
 }
+public function laporanBulanan(Request $request)
+{
+    // Validasi input bulan dan tahun yang diterima dari pengguna
+    $request->validate([
+        'bulan' => 'required|integer|min:1|max:12', // Pastikan bulan valid (1-12)
+        'tahun' => 'required|integer|min:2000|max:' . now()->year, // Pastikan tahun valid
+    ]);
+
+    $bulan = $request->bulan;
+    $tahun = $request->tahun;
+
+    // Ambil pesanan yang sudah selesai pada bulan dan tahun yang dipilih
+    $pemesanan = Pesanan::with('user', 'paket')
+        ->where('status', 6) // Status 6 berarti selesai
+        ->whereMonth('created_at', $bulan)
+        ->whereYear('created_at', $tahun)
+        ->get();
+
+    // Cek jika tidak ada transaksi pada bulan dan tahun tersebut
+    if ($pemesanan->isEmpty()) {
+        return redirect()->back()->with('error', 'Belum ada transaksi pada bulan ' . \Carbon\Carbon::createFromFormat('m', $bulan)->format('F Y') . '.');
+    }
+
+    // Kelompokkan berdasarkan user dan hitung subtotal untuk tiap user
+    $laporan = $pemesanan->groupBy('user_id')->map(function ($pesanan) {
+        return [
+            'user' => $pesanan->first()->user->name, // Nama user
+            'pesanan' => $pesanan->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'paket' => $item->paket->nama_paket ?? 'Tanpa Paket',
+                    'jumlah' => $item->jumlah,
+                    'total_harga' => $item->total_harga,
+                    'created_at' => $item->created_at, // Tambahkan tanggal pesanan
+                ];
+            }),
+            'subtotal' => $pesanan->sum('total_harga'), // Total harga untuk user ini
+        ];
+    });
+
+    $totalKeseluruhan = $pemesanan->sum('total_harga'); // Total keseluruhan
+
+    // Generate PDF
+    $pdf = PDF::loadView('laporan.bulanan', compact('laporan', 'totalKeseluruhan', 'bulan', 'tahun'));
+
+    // Tentukan header agar browser membuka PDF di tab baru
+    return $pdf->stream('laporan-bulanan-' . $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '.pdf', ['Attachment' => 0]);
+}
+
+ 
+
 // In PesananController.php
 // In PesananController.php
+
 public function dashboard()
 {
-    $pesananHariIni = Pesanan::whereDate('created_at', now()->toDateString())->count(); // Today's orders
-    $pesananSelesai = Pesanan::where('status', 6)->count(); // Completed orders
-    $pendapatanBulanan = Pesanan::whereMonth('created_at', now()->month)->sum('total_harga'); // Monthly earnings
+    $user = auth()->user();
 
-    // Paginate the latest 5 orders
-    $latestPesanan = Pesanan::latest()->paginate(5); // Paginate the latest 5 orders
+    // Query Pesanan Hari Ini
+    if ($user->role == 'pelanggan') {
+        $pesananHariIni = Pesanan::where('user_id', $user->id)
+                                ->whereDate('created_at', today())
+                                ->count();
+    } else {
+        $pesananHariIni = Pesanan::whereDate('created_at', today())->count();
+    }
 
-    return view('dashboard', compact('pesananHariIni', 'pesananSelesai', 'pendapatanBulanan', 'latestPesanan'));
+    // Query Pesanan Selesai
+    if ($user->role == 'pelanggan') {
+        $pesananSelesai = Pesanan::where('user_id', $user->id)
+                                ->where('status', 6) // Status selesai
+                                ->count();
+    } else {
+        $pesananSelesai = Pesanan::where('status', 6)->count();
+    }
+
+    // Query Pesanan Terbaru
+    if ($user->role == 'pelanggan') {
+        $latestPesanan = Pesanan::where('user_id', $user->id)
+                                ->latest()
+                                ->paginate(10);
+    } else {
+        $latestPesanan = Pesanan::latest()->paginate(10);
+    }
+
+    // Data tambahan untuk admin/staff
+    $pendapatanHarian = Pesanan::whereDate('created_at', today())
+                            ->sum('total_harga');
+    $pendapatanBulanan = Pesanan::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                                ->sum('total_harga');
+
+    // Data untuk chart (admin only)
+    $ordersPerHour = $user->role == 'admin'
+        ? Pesanan::selectRaw("HOUR(created_at) as hour, COUNT(*) as count")
+                ->whereDate('created_at', today())
+                ->groupBy('hour')
+                ->get()
+        : collect();
+
+    $ordersPerDay = $user->role == 'admin'
+        ? Pesanan::selectRaw("DATE(created_at) as date, COUNT(*) as count")
+                ->whereBetween('created_at', [now()->subDays(30), now()])
+                ->groupBy('date')
+                ->get()
+        : collect();
+
+    $monthlyIncome = $user->role == 'admin'
+        ? Pesanan::selectRaw("DATE(created_at) as date, SUM(total_harga) as income")
+                ->whereBetween('created_at', [now()->subDays(30), now()])
+                ->groupBy('date')
+                ->get()
+        : collect();
+
+    // Return data ke view
+    return view('dashboard', compact(
+        'pesananHariIni',
+        'pesananSelesai',
+        'latestPesanan',
+        'pendapatanHarian',
+        'pendapatanBulanan',
+        'ordersPerHour',
+        'ordersPerDay',
+        'monthlyIncome'
+    ));
 }
+
+
+
+
 
 
 }

@@ -104,27 +104,46 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <!-- Location (Latitude and Longitude) -->
-                        <div class="mb-3">
-                            <label for="location" class="form-label">Pilih Lokasi</label>
-                            <div id="map" style="height: 400px; width: 100%;"></div>
-                            <input type="hidden" id="latitude" name="latitude" value="{{ old("latitude") }}">
-                            <input type="hidden" id="longitude" name="longitude" value="{{ old("longitude") }}">
-                            <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the
-                                    location information</span></p>
-                            @error("latitude")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            @error("longitude")
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan</label>
+                            <select name="keterangan" id="keterangan" class="form-control" required>
+                                <option value="">Pilih Keterangan</option>
+                                <option value="Diantar" {{ old("keterangan") == "Diantar" ? "selected" : "" }}>Diantar (
+                                    Pesanan akan dijemput dan diantar oleh kurir)
+                                </option>
+                                <option value="Diambil" {{ old("keterangan") == "Diambil" ? "selected" : "" }}>Diambil (
+                                    Pesanan akan dijemput dan akan diambil sendiri)
+                                <option value="Diambil Sendiri"
+                                    {{ old("keterangan") == "Diambil Sendiri" ? "selected" : "" }}>Antar & Ambil sendiri (
+                                    Pesanan akan diantar dan diambil sendiri )
+                                </option>
+                            </select>
+                            @error("keterangan")
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <button type="submit" class="btn btn-primary">Buat Pesanan</button>
-                    </form>
                 </div>
+
+                <!-- Location (Latitude and Longitude) -->
+                <div class="mb-3">
+                    <label for="location" class="form-label">Pilih Lokasi</label>
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                    <input type="hidden" id="latitude" name="latitude" value="{{ old("latitude") }}">
+                    <input type="hidden" id="longitude" name="longitude" value="{{ old("longitude") }}">
+                    <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the
+                            location information</span></p>
+                    @error("latitude")
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    @error("longitude")
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <button type="submit" class="btn btn-primary">Buat Pesanan</button>
+                </form>
             </div>
+        </div>
         </div>
     </section>
 

@@ -15,7 +15,8 @@ Route::get('/', function () {
 // Place this after other routes for clarity
 
 Route::middleware(['auth', 'verified'])->get('/dashboard', [PesananController::class, 'dashboard'])->name('dashboard');
-
+// Admin route to display user details and their orders
+Route::get('admin/profile', [ProfileController::class, 'show'])->name('admin.profile.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -110,12 +111,14 @@ Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['au
 Route::middleware(['auth', 'role:staff,admin,kurir,pelanggan'])->group(function () {
     Route::resource('pesanan', PesananController::class)->except(['index']);
     Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
+    
 });
 
 // Allow all roles to view pesanan, with special rules for kurir
 Route::middleware(['auth'])->group(function () {
     Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    
 });
 
 // Route to show payment confirmation form
@@ -135,3 +138,6 @@ Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
 });
 Route::get('/kurir/{kurir_id}/location', [LocationController::class, 'getKurirLocation'])->name('kurir.get-location');
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/laporan-bulanan', [PesananController::class, 'laporanBulanan'])->name('laporan.bulanan');
+});

@@ -16,8 +16,8 @@
         <link rel="stylesheet" href="{{ asset("css/style.css") }}" />
         <link rel="stylesheet" href="{{ asset("css/components.css") }}" />
         <link rel="stylesheet" href="{{ asset("css/custom.css") }}" />
-        
-        @stack('css')
+
+        @stack("css")
     </head>
 
     <body>
@@ -75,7 +75,7 @@
                 <footer class="main-footer">
                     <div class="footer-left">
                         Copyright &copy; 2024<div class="bullet"></div>By <a href="https://github.com/Anjasfedo/"
-                            target="_blank">Anjasfedo</a>
+                            target="_blank">Laundry Lubis</a>
                     </div>
                 </footer>
             </div>
@@ -91,11 +91,12 @@
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
         <!-- Template JS File -->
+
         <script src="{{ asset("js/scripts.js") }}"></script>
         <script src="{{ asset("js/custom.js") }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
@@ -123,8 +124,6 @@
                 });
             });
         </script>
-
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             const Toast = Swal.mixin({
                 toast: true,

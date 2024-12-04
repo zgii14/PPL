@@ -65,9 +65,30 @@
                         <div class="mb-3">
                             <label for="location" class="form-label">Pilih Lokasi</label>
                             <div id="map" style="height: 300px; width: 100%;"></div>
-                            <input type="hidden" id="latitude" name="latitude" value="{{ $pesanan->latitude }}">
-                            <input type="hidden" id="longitude" name="longitude" value="{{ $pesanan->longitude }}">
-                            <p><strong>Lokasi Terkini:</strong> <span id="location-info"></span></p>
+                            <input type="hidden" id="latitude" name="latitude"
+                                value="{{ old("latitude", $pesanan->latitude) }}">
+                            <input type="hidden" id="longitude" name="longitude"
+                                value="{{ old("longitude", $pesanan->longitude) }}">
+                            <p><strong>Lokasi Terkini:</strong> <span id="location-info">Click on the map to get the
+                                    location information</span></p>
+                        </div>
+
+                        <!-- Keterangan (Diantar / Diambil) -->
+                        <div class="mb-3">
+                            <label for="keterangan" class="form-label">Keterangan</label>
+                            <select name="keterangan" id="keterangan"
+                                class="form-control @error("keterangan") is-invalid @enderror" required>
+                                <option value="Diambil" {{ $pesanan->keterangan == "Diambil" ? "selected" : "" }}>Diambil
+                                </option>
+                                <option value="Diantar" {{ $pesanan->keterangan == "Diantar" ? "selected" : "" }}>Diantar
+                                </option>
+                                <option value="Diambil Sendiri"
+                                    {{ $pesanan->keterangan == "Diambil Sendiri" ? "selected" : "" }}>Diambil Sendiri
+                                </option>
+                            </select>
+                            @error("keterangan")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
@@ -82,7 +103,7 @@
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const initialLat = parseFloat(document.getElementById('latitude').value) || -3.7889;
             const initialLng = parseFloat(document.getElementById('longitude').value) || 102.2655;
 
@@ -103,11 +124,11 @@
                     .then(response => response.json())
                     .then(data => {
                         const locationInfo = data?.display_name || 'Location information not available';
-                        document.getElementById("location-info").textContent = locationInfo;
+                        document.getElementById('location-info').textContent = locationInfo;
                     })
                     .catch(err => {
-                        console.error("Error fetching location info:", err);
-                        document.getElementById("location-info").textContent =
+                        console.error('Error fetching location info:', err);
+                        document.getElementById('location-info').textContent =
                             'Error fetching location information';
                     });
             }

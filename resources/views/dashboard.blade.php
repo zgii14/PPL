@@ -17,9 +17,10 @@
             <h2 class="section-title">Selamat Datang, {{ auth()->user()->name }}!</h2>
             <p class="section-lead">Lihat ringkasan pesanan dan pendapatan.</p>
 
-            <div class="row">
+            <!-- Card Statistics -->
+            <div class="row mb-4">
                 <!-- Card Pesanan Hari Ini -->
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="card card-statistic-1">
                         <div class="card-icon bg-primary">
                             <i class="fas fa-shopping-bag"></i>
@@ -29,14 +30,14 @@
                                 <h4>Pesanan Hari Ini</h4>
                             </div>
                             <div class="card-body">
-                                {{ $pesananHariIni }} <!-- Jumlah Pesanan Hari Ini -->
+                                {{ $pesananHariIni }}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card Pesanan Selesai -->
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="card card-statistic-1">
                         <div class="card-icon bg-success">
                             <i class="fas fa-check-circle"></i>
@@ -46,80 +47,186 @@
                                 <h4>Pesanan Selesai</h4>
                             </div>
                             <div class="card-body">
-                                {{ $pesananSelesai }} <!-- Jumlah Pesanan Selesai -->
+                                {{ $pesananSelesai }}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card Pendapatan Bulanan -->
-                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                    <div class="card card-statistic-1">
-                        <div class="card-icon bg-warning">
-                            <i class="fas fa-money-bill-wave"></i> <!-- Optional icon change -->
+                <!-- Card Pendapatan Harian -->
+                @if (auth()->user()->role !== "pelanggan")
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-info">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Pendapatan Hari Ini</h4>
+                                </div>
+                                <div class="card-body">
+                                    Rp {{ number_format($pendapatanHarian, 0, ",", ".") }}
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-wrap">
+                    </div>
+                @endif
+
+                @if (auth()->user()->role == "admin")
+                    <!-- Card Pendapatan Bulanan -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon bg-warning">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>Pendapatan Bulanan</h4>
+                                </div>
+                                <div class="card-body">
+                                    Rp {{ number_format($pendapatanBulanan, 0, ",", ".") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Charts -->
+            @if (auth()->user()->role == "admin")
+                <div class="row mb-4">
+                    <!-- Orders Per Hour Chart -->
+                    <div class="col-12">
+                        <div class="card">
                             <div class="card-header">
-                                <h4>Pendapatan Bulanan</h4>
+                                <h4>Pesanan per Jam (Hari Ini)</h4>
                             </div>
                             <div class="card-body">
-                                Rp {{ number_format($pendapatanBulanan, 0, ",", ".") }} <!-- Changed $ to Rp -->
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="ordersPerHourChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Per Day Chart -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Pesanan per Hari (30 Hari Terakhir)</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="ordersChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Status Pesanan Terbaru -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Status Pesanan Terbaru</h4>
-                        </div>
-                        <div class="card-body p-5">
-                            <table class="table-striped table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Nama Pelanggan</th>
-                                        <th>Status</th>
-                                        <th>Tanggal</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($latestPesanan as $item)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->user->name }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge @if ($item->status == 6) badge-success
-                                                    @elseif($item->status == 5) badge-warning
-                                                    @elseif($item->status == 4) badge-info
-                                                    @elseif($item->status == 3) badge-primary
-                                                    @elseif($item->status == 2) badge-secondary
-                                                    @elseif($item->status == 1) badge-danger
-                                                    @else badge-dark @endif">
-                                                    {{ $item->status == 6 ? "Selesai" : ($item->status == 5 ? "Diantar" : ($item->status == 4 ? "Lipat" : ($item->status == 3 ? "Kering" : ($item->status == 2 ? "Cuci" : "Dijemput")))) }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $item->created_at->format("Y-m-d") }}</td>
-                                            <td>Rp {{ number_format($item->total_harga, 0, ",", ".") }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                <div class="row mb-4">
+                    <!-- Monthly Income Chart -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Pendapatan Bulanan (30 Hari Terakhir)</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="incomeChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Pagination for Latest Orders -->
-            <div class="card-footer d-flex justify-content-center">
-                {{ $latestPesanan->links() }}
-            </div>
+            @endif
         </div>
     </section>
+
+    @push("scripts")
+        <script>
+            // Orders Per Hour Chart
+            var ordersPerHourChart = new Chart(document.getElementById('ordersPerHourChart'), {
+                type: 'line',
+                data: {
+                    labels: @json($ordersPerHour->pluck("hour")), // Jam yang ditampilkan di sumbu X
+                    datasets: [{
+                        label: 'Jumlah Pesanan per Jam',
+                        data: @json($ordersPerHour->pluck("count")), // Jumlah pesanan per jam
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 1,
+                                beginAtZero: true,
+                            },
+                            beginAtZero: true,
+                            type: 'linear'
+                        }
+                    }
+                }
+            });
+
+            // Orders Per Day Chart
+            var ordersChart = new Chart(document.getElementById('ordersChart'), {
+                type: 'line',
+                data: {
+                    labels: @json($ordersPerDay->pluck("date")),
+                    datasets: [{
+                        label: 'Jumlah Pesanan',
+                        data: @json($ordersPerDay->pluck("count")),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 1,
+                                beginAtZero: true,
+                            },
+                            beginAtZero: true,
+                            type: 'linear'
+                        }
+                    }
+                }
+            });
+
+            // Monthly Income Chart
+            var incomeChart = new Chart(document.getElementById('incomeChart'), {
+                type: 'bar',
+                data: {
+                    labels: @json($monthlyIncome->pluck("date")),
+                    datasets: [{
+                        label: 'Pendapatan (Rp)',
+                        data: @json($monthlyIncome->pluck("income")),
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+  
+    @endpush
 @endsection

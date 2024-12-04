@@ -63,19 +63,19 @@
                         <p>
                             @switch($pesanan->status)
                                 @case(0)
-                                    <span class="badge badge-warning">Penjemputan</span>
+                                    <span class="badge badge-warning">Proses</span>
                                 @break
 
                                 @case(1)
-                                    <span class="badge badge-info">Penjemputan</span>
+                                    <span class="badge badge-info">Proses</span>
                                 @break
 
                                 @case(2)
-                                    <span class="badge badge-danger">Cuci</span>
+                                    <span class="badge badge-danger">Dijemput</span>
                                 @break
 
                                 @case(3)
-                                    <span class="badge badge-danger">Kering</span>
+                                    <span class="badge badge-danger">Cuci</span>
                                 @break
 
                                 @case(4)
@@ -87,7 +87,7 @@
                                 @break
 
                                 @case(6)
-                                    <span class="badge badge-success">Selesai dan Dibayar</span>
+                                    <span class="badge badge-success">Selesai</span>
                                 @break
 
                                 @default

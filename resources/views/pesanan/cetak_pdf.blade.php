@@ -39,14 +39,20 @@
             }
 
             .header h1 {
-                font-size: 24px;
+                font-size: 22px;
                 color: #333;
                 margin: 0;
             }
 
             .header p {
-                font-size: 14px;
+                font-size: 12px;
                 color: #777;
+            }
+
+            .details {
+                margin: 15px 0;
+                font-size: 14px;
+                color: #555;
             }
 
             table {
@@ -57,10 +63,10 @@
 
             th,
             td {
-                padding: 10px;
+                padding: 8px;
                 text-align: left;
                 border-bottom: 1px solid #ddd;
-                font-size: 14px;
+                font-size: 13px;
             }
 
             th {
@@ -93,6 +99,27 @@
             .footer a:hover {
                 text-decoration: underline;
             }
+
+            .stamp {
+                text-align: right;
+                /* Letakkan elemen ke kanan */
+                margin-top: 20px;
+            }
+
+            .stamp img {
+                width: 100px;
+                opacity: 0.8;
+                display: inline-block;
+                /* Pastikan gambar tetap proporsional */
+            }
+
+            .stamp p {
+                font-size: 12px;
+                color: #555;
+                margin-top: 5px;
+                text-align: right;
+                /* Teks di bawah gambar tetap sejajar kanan */
+            }
         </style>
     </head>
 
@@ -102,6 +129,11 @@
                 <h1>Laundry Lubis</h1>
                 <p>Alamat: Jl. WR. Supratman, Kandang Limun, Kec. Muara Bangka Hulu, Kota Bengkulu</p>
                 <p>Telp: 083173289305</p>
+            </div>
+
+            <div class="details">
+                <p><strong>Tanggal Pesanan:</strong> {{ $pesanan->created_at->format("d-m-Y H:i") }}</p>
+                <p><strong>Nama Pelanggan:</strong> {{ $pesanan->user->name }}</p>
             </div>
 
             <table>
@@ -118,7 +150,7 @@
                     <tr>
                         <td>{{ $pesanan->id }}</td>
                         <td>{{ $pesanan->paket->nama_paket }}</td>
-                        <td>{{ $pesanan->jumlah }} Kg</td> <!-- Menambahkan unit Kg di jumlah -->
+                        <td>{{ $pesanan->jumlah }} Kg</td>
                         <td>
                             @switch($pesanan->status)
                                 @case(0)
@@ -146,18 +178,22 @@
                                 @break
 
                                 @case(6)
-                                    Selesai dan Dibayar
+                                    Selesai
                                 @break
 
                                 @default
                                     Status Tidak Diketahui
                             @endswitch
                         </td>
-
-                        <td>Rp {{ number_format($pesanan->total_harga, 2) }}</td>
+                        <td>Rp {{ number_format($pesanan->total_harga, 0, ",", ".") }}</td>
                     </tr>
                 </tbody>
             </table>
+
+            <div class="stamp">
+                <img src="{{ public_path("asset/images/stempel.png") }}" alt="Stempel Laundry Lubis">
+                <p>Staff Laundry Lubis</p>
+            </div>
 
             <div class="footer">
                 <p>Terima kasih atas pesanan Anda!</p>

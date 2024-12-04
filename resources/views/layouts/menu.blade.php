@@ -11,7 +11,6 @@
             <li>
                 <a class="nav-link" href="{{ route("admin.users.index") }}">Pengguna</a>
             </li>
-
         </ul>
     </li>
     <li class="menu-header">Manajemen Laporan</li>
@@ -19,6 +18,7 @@
         <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="far fa-file-alt"></i>
             <span>Laporan Transaksi</span></a>
         <ul class="dropdown-menu">
+
             <li>
                 <a class="nav-link" href="{{ route("paket-laundry.index") }}">Paket Laundry</a>
             </li>
@@ -30,11 +30,9 @@
                     <a class="nav-link" href="{{ route("pesanan.index") }}">Pemesanan</a>
                 </li>
             @endif
-            <li>
-                @if (Auth::user()->role == "kurir")
-            <li><a class="nav-link" href="{{ route("kurir.pesanan.index") }}">Data Kurir</a></li>
-    </li>
-    @endif
 
-</ul>
-</li>x
+            @if (Auth::user()->role == "kurir")
+                <li><a class="nav-link" href="{{ route("kurir.pesanan.index") }}">Data Kurir</a></li>
+            @endif
+        </ul>
+    </li>

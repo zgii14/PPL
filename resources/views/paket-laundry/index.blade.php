@@ -11,18 +11,20 @@
         </div>
 
         <!-- Button Add New Package -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header justify-content-between">
-                        <h4 class="mb-0">Paket Laundry</h4>
-                        <a href="{{ route("paket-laundry.create") }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Paket Baru
-                        </a>
+        @if (auth()->user()->role !== "pelanggan")
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header justify-content-between">
+                            <h4 class="mb-0">Paket Laundry</h4>
+                            <a href="{{ route("paket-laundry.create") }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Tambah Paket Baru
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
         <div class="section-body">
             <div class="row">
@@ -75,23 +77,31 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
+                                                        <!-- Show button is always available -->
                                                         <a href="{{ route("paket-laundry.show", $item->id) }}"
                                                             class="btn btn-info btn-sm" title="Detail">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <a href="{{ route("paket-laundry.edit", $item->id) }}"
-                                                            class="btn btn-warning btn-sm" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form action="{{ route("paket-laundry.destroy", $item->id) }}"
-                                                            method="POST" class="delete-form d-inline">
-                                                            @csrf
-                                                            @method("DELETE")
-                                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                                title="Hapus">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
+
+                                                        <!-- Edit and Delete buttons are hidden for pelanggan -->
+                                                        @if (auth()->user()->role !== "kurir" && auth()->user()->role !== "staf")
+                                                            @if (auth()->user()->role == "admin")
+                                                                <a href="{{ route("pesanan.edit", $item->id) }}"
+                                                                    class="btn btn-warning btn-sm" title="Edit">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                                <form action="{{ route("pesanan.destroy", $item->id) }}"
+                                                                    method="POST" class="delete-form d-inline">
+                                                                    @csrf
+                                                                    @method("DELETE")
+                                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                                        title="Hapus">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+                                                        @endif
+
                                                     </div>
                                                 </td>
                                             </tr>

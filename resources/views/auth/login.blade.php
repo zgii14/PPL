@@ -27,8 +27,9 @@
                             <div class="auth-form-light px-sm-5 px-4 py-5 text-left">
                                 <div class="brand-logo">
                                     <div class="mb-4 text-center">
-                                        <img src="{{ asset("asset/images/logo-himatif.png") }}" alt="logo"
-                                            class="logo-center">
+                                        <img src="{{ asset("asset/images/laundry_lubis.png") }}" alt="logo"
+                                            class="logo-center" style="width: 230px; height: auto;">
+
                                     </div>
                                 </div>
                                 <h4>Hello! Ayo Masuk</h4>

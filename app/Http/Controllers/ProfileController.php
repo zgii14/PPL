@@ -57,4 +57,12 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+    public function show(Request $request)
+    {
+        // Get the currently authenticated user with their orders and related data
+        $user = $request->user()->load('pesanan.paket', 'pesanan.pembayaran');
+
+        // Return the 'admin.show' view instead of 'profile.show'
+        return view('admin.show', compact('user'));
+    }
 }

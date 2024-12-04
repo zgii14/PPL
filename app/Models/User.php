@@ -54,5 +54,10 @@ public function location()
 {
     return $this->hasOne(Location::class);
 }
+// In User model
+public function pesanan()
+{
+    return $this->hasMany(Pesanan::class);
+}
 
 }

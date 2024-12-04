@@ -25,7 +25,10 @@ return new class extends Migration
             $table->bigInteger('longitude'); // Longitude stored as integer (microdegrees)
 
             // Status tahapan proses laundry (1: Cuci, 2: Kering, 3: Strika, 4: Siap, 5: Selesai)
-            $table->tinyInteger('status')->default(1)->comment('1: Penjemputan, 2: Cuci , 3: Kering, 4: Lipat, 5: Pengantaran, 6: Selesai');
+            $table->tinyInteger('status')->default(1)->comment('1: Proses, 2: Dijemput , 3: Cuci, 4:Lipat , 5: Diantar, 6: Selesai');
+            
+            // Menambahkan kolom keterangan untuk mencatat pilihan "Dijemput" atau "Diambil"
+            $table->enum('keterangan', ['Diantar', 'Diambil','Diambil Sendiri'])->default('Diambil'); // Pilihan default: Diambil
 
             $table->timestamps(); // created_at dan updated_at
         });
