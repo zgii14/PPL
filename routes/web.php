@@ -105,11 +105,11 @@ Route::delete('users/{user}', function (App\Models\User $user) {
     return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
 })->name('admin.users.destroy');
 
-Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth']);
+Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth',]);
 // routes/web.php
+Route::resource('pesanan', PesananController::class)->except(['index', 'show']);
+Route::middleware(['auth', 'role:staff,admin,kurir'])->group(function () {
 
-Route::middleware(['auth', 'role:staff,admin,kurir,pelanggan'])->group(function () {
-    Route::resource('pesanan', PesananController::class)->except(['index']);
     Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
     
 });
@@ -138,11 +138,14 @@ Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
     Route::post('/pesanan/{id}/konfirmasi-bayar', [KurirController::class, 'konfirmasiBayar'])->name('kurir.pesanan.konfirmasiBayar');
 });
 
-Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat.index');
-Route::middleware(['auth', 'role:admin'])->group(function () {
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/laporan-bulanan', [PesananController::class, 'laporanBulanan'])->name('laporan.bulanan');
 });
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','role:pelanggan'])->group(function () {
     Route::get('/riwayat-saya', [RiwayatUserController::class, 'index'])->name('riwayat.saya');
 });
+Route::middleware(['auth','role:admin,staff'])->group(function () {
+    Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat.index');
+});
+

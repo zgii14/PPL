@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Staff',
             'email' => 'staff@example.com',
             'password' => Hash::make('staff123'),
+            'phone' => '08123453789',
             'role' => 'staff',
         ]);
 
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Kurir',
             'email' => 'kurir@example.com',
             'password' => Hash::make('kurir123'),
+            'phone' => '08123456789',
             'role' => 'kurir',
         ]);
 
@@ -43,6 +45,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Pelanggan',
             'email' => 'pelanggan@example.com',
             'password' => Hash::make('pelanggan123'),
+            'phone' => '08123426789',
             'role' => 'pelanggan',
         ]);
 

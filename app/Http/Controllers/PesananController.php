@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Helpers\WhatsAppNotifier;
 use App\Models\Pesanan;
 use App\Models\PaketLaundry;
 use App\Models\Pembayaran;
@@ -242,8 +242,8 @@ public function updateJumlah(Request $request, $id)
     }
 
     // Update Status Pesanan (Berpindah ke Status Berikutnya)
-   // Update Status Pesanan (Berpindah ke Status Berikutnya)
-   public function updateStatus(Request $request, $id)
+
+public function updateStatus(Request $request, $id)
 {
     // Validasi status yang diminta
     $request->validate([
@@ -288,6 +288,22 @@ public function updateJumlah(Request $request, $id)
     // Update status pesanan dengan status baru
     $pesanan->status = $request->status;
     $pesanan->save();
+
+    // Kirim notifikasi WhatsApp jika status berubah menjadi Dijemput atau Diantar
+    if (in_array($request->status, [2, 5])) { // 2: Dijemput, 5: Diantar
+        $phoneNumber = $pesanan->user->phone; // Pastikan ada kolom 'phone' di tabel pengguna
+        $statusMessage = $request->status == 2 ? 'Dijemput' : 'Diantar';
+        $message = "Halo, pesanan Anda dengan ID: {$pesanan->id} sedang $statusMessage. Terima kasih telah menggunakan layanan kami.";
+
+        $notificationResponse = WhatsAppNotifier::sendNotification($phoneNumber, $message);
+
+        if (!$notificationResponse) {
+            return redirect()->back()->with(
+                'error',
+                'Status berhasil diperbarui, tetapi notifikasi WhatsApp gagal dikirim.'
+            );
+        }
+    }
 
     return redirect()->route('pesanan.index')->with(
         'success',
