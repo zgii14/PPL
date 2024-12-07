@@ -109,7 +109,7 @@
                                             <th class="text-center">Pengguna</th>
                                             <th class="text-center">Jumlah</th>
                                             <th class="text-center">Total Harga</th>
-                                            <th class="text-center">Keterangan</th> <!-- Added Keterangan column -->
+                                            <th class="text-center">Keterangan</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Pembayaran</th>
                                             <th class="text-center">Aksi</th>
@@ -128,7 +128,41 @@
                                                 </td>
                                                 <td class="text-center">{{ $item->paket->nama_paket }}</td>
                                                 <td class="text-center">{{ $item->user->name }}</td>
-                                                <td class="text-center">{{ $item->jumlah }}</td>
+                                                <td class="text-center">
+                                                    @if (auth()->user()->role === "staff")
+                                                        <form action="{{ route("pesanan.update-jumlah", $item->id) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method("PATCH")
+                                                            <div class="d-flex justify-content-center align-items-center">
+                                                                <!-- Input jumlah -->
+                                                                <input type="number" name="jumlah"
+                                                                    value="{{ $item->jumlah ?? "" }}"
+                                                                    class="form-control form-control-sm text-center"
+                                                                    style="width: 70px;" placeholder="-" step="0.01"
+                                                                    onblur="this.form.submit()" required />
+
+                                                                <!-- Tampilkan 'kg' hanya jika jumlah tidak kosong -->
+                                                                @if (!empty($item->jumlah))
+                                                                    <span
+                                                                        style="font-size: 14px; margin-left: 5px; font-weight: bold;">kg</span>
+                                                                @endif
+
+                                                                <!-- Hidden input untuk total harga -->
+                                                                <input type="hidden" name="total_harga"
+                                                                    id="total_harga_{{ $item->id }}"
+                                                                    value="{{ $item->total_harga ?? $item->paket->harga * ($item->jumlah ?? 1) }}">
+                                                            </div>
+                                                        </form>
+                                                    @else
+                                                        <!-- Tampilkan jumlah dan 'kg' hanya jika jumlah ada -->
+                                                        {{ $item->jumlah ?? "Tidak Diketahui" }}
+                                                        @if (!empty($item->jumlah))
+                                                            kg
+                                                        @endif
+                                                    @endif
+                                                </td>
+
                                                 <td class="text-center">Rp
                                                     {{ number_format($item->total_harga, 0, ",", ".") }}</td>
                                                 <td class="text-center">{{ $item->keterangan ?? "Tidak Ada" }}</td>
@@ -278,4 +312,22 @@
             });
         });
     </script>
+    <script>
+        function updateTotalPrice(input, hargaPaket) {
+            var jumlah = parseFloat(input.value) || 0;
+            var totalHarga = hargaPaket * jumlah;
+
+            // Update hidden field untuk total harga
+            var totalHargaField = document.getElementById('total_harga_' + input.name);
+            totalHargaField.value = totalHarga;
+
+            // Update tampilan harga di form
+            var displayPrice = document.getElementById('display_price_' + input.name);
+            displayPrice.textContent = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(totalHarga);
+        }
+    </script>
+
 @endsection

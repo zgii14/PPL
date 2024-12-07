@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')
                   ->constrained('users') // Relasi ke tabel users
                   ->onDelete('cascade'); // Hapus pesanan jika user dihapus
-            $table->integer('jumlah'); // Jumlah barang/paket
+                  $table->float('jumlah')->nullable()->comment('Jumlah pakaian, diisi setelah diukur oleh staf');
             $table->integer('total_harga'); // Total harga pesanan
             $table->bigInteger('latitude'); // Latitude stored as integer (microdegrees)
             $table->bigInteger('longitude'); // Longitude stored as integer (microdegrees)

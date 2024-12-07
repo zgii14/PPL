@@ -96,7 +96,7 @@ class PesananController extends Controller
         // Validasi untuk data pesanan
         $request->validate([
             'paket_id' => 'required|exists:paket_laundry,id',
-            'jumlah' => 'required|integer|min:1',
+            'jumlah' => 'nullable|numeric|min:0.1',
             'keterangan' => 'required|in:Diantar,Diambil,Diambil Sendiri', // Validasi untuk keterangan (Dijemput/Diambil)
         ]);
     
@@ -176,7 +176,7 @@ class PesananController extends Controller
 {
     $request->validate([
         'paket_id' => 'required|exists:paket_laundry,id',
-        'jumlah' => 'required|integer|min:1',
+        'jumlah' => 'nullable|numeric|min:0.1',
         'user_id' => 'required|exists:users,id',
         'latitude' => 'required|numeric|between:-90,90',
         'longitude' => 'required|numeric|between:-180,180',
@@ -198,6 +198,28 @@ class PesananController extends Controller
     ]);
 
     return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diperbarui.');
+}
+
+public function updateJumlah(Request $request, $id)
+{
+    $pesanan = Pesanan::findOrFail($id);
+
+    // Validasi input jumlah
+    $request->validate([
+        'jumlah' => 'required|numeric|min:1',
+    ]);
+
+    // Hitung total harga baru
+    $jumlah = $request->input('jumlah');
+    $totalHarga = $jumlah * $pesanan->paket->harga;
+
+    // Update jumlah dan total harga
+    $pesanan->update([
+        'jumlah' => $jumlah,
+        'total_harga' => $totalHarga,
+    ]);
+
+    return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil diperbarui');
 }
 
 

@@ -96,14 +96,19 @@
                         @endif
 
                         <!-- Quantity -->
-                        <div class="mb-3">
-                            <label for="jumlah" class="form-label">Jumlah</label>
-                            <input type="number" name="jumlah" class="form-control @error("jumlah") is-invalid @enderror"
-                                min="1" placeholder="Masukkan jumlah" value="{{ old("jumlah") }}">
-                            @error("jumlah")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <!-- Quantity (Only for staff, not regular users) -->
+                        @if (auth()->user()->role !== "pelanggan")
+                            <div class="mb-3">
+                                <label for="jumlah" class="form-label">Jumlah</label>
+                                <input type="number" name="jumlah"
+                                    class="form-control @error("jumlah") is-invalid @enderror" min="1" step="0.01"
+                                    placeholder="Masukkan jumlah" value="{{ old("jumlah") }}">
+                                @error("jumlah")
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endif
+
                         <div class="form-group">
                             <label for="keterangan">Keterangan</label>
                             <select name="keterangan" id="keterangan" class="form-control" required>

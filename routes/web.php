@@ -127,6 +127,7 @@ Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPayme
 // Route to process the payment and update status
 Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');
 Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');
+Route::patch('/pesanan/{id}/update-jumlah', [PesananController::class, 'updateJumlah'])->name('pesanan.update-jumlah');
 
 // Menentukan middleware 'roleCheck' untuk memastikan hanya 'kurir' yang bisa mengakses
 // web.php (Route)

@@ -69,6 +69,7 @@
                                 value="{{ old("latitude", $pesanan->latitude) }}">
                             <input type="hidden" id="longitude" name="longitude"
                                 value="{{ old("longitude", $pesanan->longitude) }}">
+
                             <p><strong>Lokasi Terkini:</strong> <span id="location-info">Click on the map to get the
                                     location information</span></p>
                         </div>
