@@ -6,47 +6,47 @@ use App\Models\Pesanan;
 use App\Models\PaketLaundry;
 use App\Models\Pembayaran;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
-use Dompdf\Dompdf;
-use Dompdf\Options;
-use Carbon\Carbon;
+use App\models\Riwayat;
+
 class PesananController extends Controller
 {
     // Menampilkan daftar pesanan
     public function index()
-{
-    $userRole = auth()->user()->role;
-
-    // Jika yang mengakses adalah admin
-    if ($userRole === 'admin') {
-        // Admin bisa melihat semua pesanan yang sudah selesai (status 6) dan pembayaran berhasil
-        $pesanan = Pesanan::with(['paket', 'user'])
-            ->where('status', 6) // Hanya pesanan yang sudah selesai
-            ->whereHas('pembayaran', function ($query) {
-                $query->where('status', 'berhasil'); // Hanya pembayaran yang berhasil
-            })
-            ->where('keterangan', '!=', 'Diambil Sendiri') // Exclude pesanan dengan keterangan "Diambil Sendiri"
-            ->paginate(10);
-    } elseif ($userRole === 'staff') {
-        // Jika yang mengakses adalah staff, bisa melihat semua pesanan dengan keterangan apapun
-        $pesanan = Pesanan::with(['paket', 'user'])
-            ->paginate(10); // Staff dapat melihat semua pesanan tanpa batasan keterangan
-    } elseif ($userRole === 'kurir') {
-        // Jika yang mengakses adalah kurir, hanya bisa melihat pesanan yang tidak memiliki keterangan "Diambil Sendiri"
-        $pesanan = Pesanan::with(['paket', 'user'])
-            ->where('keterangan', '!=', 'Diambil Sendiri') // Exclude pesanan dengan keterangan "Diambil Sendiri"
-            ->paginate(10); // Pesanan selain "Diambil Sendiri"
-    } else {
-        // Untuk selain admin, staff, atau kurir, hanya bisa melihat pesanan mereka sendiri
-        $pesanan = Pesanan::with(['paket', 'user'])
-            ->where('user_id', auth()->id()) // Pesanan milik pengguna yang login
-            ->paginate(10); // Pesanan milik user yang login
+    {
+        $userRole = auth()->user()->role;
+    
+        // Jika yang mengakses adalah admin
+        if ($userRole === 'admin') {
+            // Admin bisa melihat semua pesanan yang sudah selesai (status 6) dan pembayaran berhasil
+            $pesanan = Pesanan::with(['paket', 'user'])
+                ->where('status', 6) // Hanya pesanan yang sudah selesai
+                ->whereHas('pembayaran', function ($query) {
+                    $query->where('status', 'berhasil'); // Hanya pembayaran yang berhasil
+                })
+                ->paginate(10);
+        } elseif ($userRole === 'staff') {
+            // Jika yang mengakses adalah staff, bisa melihat semua pesanan dengan keterangan apapun
+            $pesanan = Pesanan::with(['paket', 'user'])
+                ->paginate(10); // Staff dapat melihat semua pesanan tanpa batasan keterangan
+        } elseif ($userRole === 'kurir') {
+            // Jika yang mengakses adalah kurir, hanya bisa melihat pesanan yang tidak memiliki keterangan "Diambil Sendiri"
+            $pesanan = Pesanan::with(['paket', 'user'])
+                ->where('keterangan', '!=', 'Diambil Sendiri') // Exclude pesanan dengan keterangan "Diambil Sendiri"
+                ->paginate(10); // Pesanan selain "Diambil Sendiri"
+        } else {
+            // Untuk selain admin, staff, atau kurir, hanya bisa melihat pesanan mereka sendiri
+            $pesanan = Pesanan::with(['paket', 'user'])
+                ->where('user_id', auth()->id()) // Pesanan milik pengguna yang login
+                ->paginate(10); // Pesanan milik user yang login
+        }
+    
+        // Mengirimkan data pesanan ke tampilan (view)
+        return view('pesanan.index', compact('pesanan'));
     }
-
-    // Mengirimkan data pesanan ke tampilan (view)
-    return view('pesanan.index', compact('pesanan'));
-}
+    
 
 
 
@@ -149,6 +149,7 @@ class PesananController extends Controller
         // Redirect ke halaman daftar pesanan dengan pesan sukses
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dibuat.');
     }
+
         public function show($id)
     {
         // Mengambil data pesanan beserta paket dan user terkait
@@ -165,12 +166,21 @@ class PesananController extends Controller
     // Menampilkan form edit pesanan
     public function edit($id)
     {
+        // Ambil pesanan yang sesuai dengan ID
         $pesanan = Pesanan::findOrFail($id);
+        
+        // Mengonversi latitude dan longitude kembali ke format desimal
+        $latitude = $pesanan->latitude / 1000000;  // Mengembalikan nilai latitude ke format desimal
+        $longitude = $pesanan->longitude / 1000000; // Mengembalikan nilai longitude ke format desimal
+        
+        // Ambil data paket laundry dan pengguna
         $paket = PaketLaundry::all();
         $users = User::all();
-        return view('pesanan.edit', compact('pesanan', 'paket', 'users'));
+        
+        // Kirim data ke view, termasuk nilai latitude dan longitude yang sudah dikonversi
+        return view('pesanan.edit', compact('pesanan', 'paket', 'users', 'latitude', 'longitude'));
     }
-
+    
     // Memperbarui pesanan
     public function update(Request $request, $id)
 {
@@ -180,7 +190,7 @@ class PesananController extends Controller
         'user_id' => 'required|exists:users,id',
         'latitude' => 'required|numeric|between:-90,90',
         'longitude' => 'required|numeric|between:-180,180',
-        'keterangan' => 'required|in:Diantar,Diambil', // Validasi untuk keterangan
+        'keterangan' => 'required|in:Diantar,Diambil,Diambil Sendiri', // Validasi untuk keterangan
     ]);
 
     $pesanan = Pesanan::findOrFail($id);
@@ -389,52 +399,57 @@ public function updateJumlah(Request $request, $id)
 }
 public function laporanBulanan(Request $request)
 {
-    // Validasi input bulan dan tahun yang diterima dari pengguna
+    // Validasi input bulan dan tahun dari user
     $request->validate([
-        'bulan' => 'required|integer|min:1|max:12', // Pastikan bulan valid (1-12)
-        'tahun' => 'required|integer|min:2000|max:' . now()->year, // Pastikan tahun valid
+        'bulan' => 'required|integer|min:1|max:12',
+        'tahun' => 'required|integer|min:2000|max:' . now()->year,
     ]);
 
     $bulan = $request->bulan;
     $tahun = $request->tahun;
 
-    // Ambil pesanan yang sudah selesai pada bulan dan tahun yang dipilih
-    $pemesanan = Pesanan::with('user', 'paket')
-        ->where('status', 6) // Status 6 berarti selesai
+    // Ambil data transaksi berdasarkan bulan dan tahun dengan relasi
+    $transaksi = Riwayat::with(['user', 'paket']) 
         ->whereMonth('created_at', $bulan)
         ->whereYear('created_at', $tahun)
         ->get();
 
-    // Cek jika tidak ada transaksi pada bulan dan tahun tersebut
-    if ($pemesanan->isEmpty()) {
-        return redirect()->back()->with('error', 'Belum ada transaksi pada bulan ' . \Carbon\Carbon::createFromFormat('m', $bulan)->format('F Y') . '.');
+    if ($transaksi->isEmpty()) {
+        return redirect()->back()->with('error', 'Belum ada transaksi pada bulan ' . Carbon::create($tahun, $bulan)->format('F Y') . '.');
     }
 
-    // Kelompokkan berdasarkan user dan hitung subtotal untuk tiap user
-    $laporan = $pemesanan->groupBy('user_id')->map(function ($pesanan) {
+    // Kelompokkan data berdasarkan pengguna
+    $laporan = $transaksi->groupBy(function ($item) {
+        return $item->user->name ?? 'Unknown';
+    })->map(function ($items) {
         return [
-            'user' => $pesanan->first()->user->name, // Nama user
-            'pesanan' => $pesanan->map(function ($item) {
+            'user' => $items->first()->user->name ?? 'Unknown',
+            'pesanan_count' => $items->count(), // Hitung jumlah pesanan
+            'subtotal' => $items->sum('total_harga'), // Hitung subtotal
+            'pesanan' => $items->map(function ($item) {
                 return [
-                    'id' => $item->id,
                     'paket' => $item->paket->nama_paket ?? 'Tanpa Paket',
                     'jumlah' => $item->jumlah,
                     'total_harga' => $item->total_harga,
-                    'created_at' => $item->created_at, // Tambahkan tanggal pesanan
+                    'tanggal' => $item->created_at,
                 ];
             }),
-            'subtotal' => $pesanan->sum('total_harga'), // Total harga untuk user ini
         ];
     });
 
-    $totalKeseluruhan = $pemesanan->sum('total_harga'); // Total keseluruhan
+    // Hitung total keseluruhan dari semua transaksi
+    $totalKeseluruhan = $transaksi->sum('total_harga');
 
-    // Generate PDF
-    $pdf = PDF::loadView('laporan.bulanan', compact('laporan', 'totalKeseluruhan', 'bulan', 'tahun'));
+    // Debug: Periksa data sebelum dibuat menjadi laporan
+    // dd($laporan, $totalKeseluruhan);
 
-    // Tentukan header agar browser membuka PDF di tab baru
-    return $pdf->stream('laporan-bulanan-' . $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) . '.pdf', ['Attachment' => 0]);
+    // Kirim data ke view
+    $pdf = PDF::loadView('laporan.bulanan', compact('laporan', 'totalKeseluruhan', 'bulan', 'tahun'))
+    ->setPaper('A4', 'portrait');
+
+return $pdf->stream('laporan-bulanan.pdf');
 }
+
 
  
 
@@ -472,10 +487,12 @@ public function dashboard()
         $latestPesanan = Pesanan::latest()->paginate(10);
     }
 
-    // Data tambahan untuk admin/staff
+    // **Pendapatan Harian** (Dari Tabel Pesanan)
     $pendapatanHarian = Pesanan::whereDate('created_at', today())
                             ->sum('total_harga');
-    $pendapatanBulanan = Pesanan::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+
+    // **Pendapatan Bulanan** (Dari Tabel Riwayat)
+    $pendapatanBulanan = Riwayat::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
                                 ->sum('total_harga');
 
     // Data untuk chart (admin only)
@@ -494,7 +511,7 @@ public function dashboard()
         : collect();
 
     $monthlyIncome = $user->role == 'admin'
-        ? Pesanan::selectRaw("DATE(created_at) as date, SUM(total_harga) as income")
+        ? Riwayat::selectRaw("DATE(created_at) as date, SUM(total_harga) as income")
                 ->whereBetween('created_at', [now()->subDays(30), now()])
                 ->groupBy('date')
                 ->get()
@@ -512,8 +529,6 @@ public function dashboard()
         'monthlyIncome'
     ));
 }
-
-
 
 
 

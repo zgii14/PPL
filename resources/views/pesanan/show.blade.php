@@ -23,7 +23,7 @@
 
                     <div class="form-group">
                         <label><strong>Jumlah:</strong></label>
-                        <p>{{ $pesanan->jumlah }}</p>
+                        <p>{{ $pesanan->jumlah }} Kg</p>
                     </div>
 
                     <div class="form-group">
@@ -44,6 +44,23 @@
                     <div class="form-group">
                         <label><strong>Perkiraan Waktu Selesai:</strong></label>
                         <p>{{ $pesanan->waktu_selesai }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label><strong>Keterangan Jenis Pesanan:</strong></label>
+                        <p>
+                            @if ($pesanan->keterangan == "Diantar")
+                                <span class="badge badge-warning">Diantar (Pesanan akan dijemput dan diantar oleh
+                                    kurir)</span> <!-- Kuning -->
+                            @elseif ($pesanan->keterangan == "Diambil")
+                                <span class="badge badge-success">Diambil (Pesanan akan dijemput kurir dan akan diambil
+                                    sendiri oleh pelanggan)</span> <!-- Hijau -->
+                            @elseif ($pesanan->keterangan == "Diambil Sendiri")
+                                <span class="badge badge-danger">Diambil Sendiri (Pesanan akan diantar dan diambil
+                                    sendiri oleh pelanngan)</span> <!-- Merah -->
+                            @else
+                                <span>Tidak Ada</span>
+                            @endif
+                        </p>
                     </div>
 
                     @if ($pesanan->pembayaran)
@@ -95,7 +112,6 @@
                             @endswitch
                         </p>
                     </div>
-
                     <!-- Lokasi -->
                     <div class="form-group" id="tampilkan-rute">
                         <label><strong>Lokasi:</strong></label>
@@ -103,12 +119,38 @@
                         <p><strong>Informasi Lokasi:</strong> <span id="location-info">Memuat lokasi...</span></p>
                     </div>
 
-                    <!-- Show 'Tampilkan Rute' button only if the user is Kurir -->
+                    <!-- Tombol untuk Google Maps -->
+                    <!-- Tombol untuk Google Maps -->
                     @if (auth()->user()->role == "kurir")
-                        <!-- Button to Show Route -->
                         <div class="form-group">
-                            <button id="showRouteButton" class="btn btn-primary">Tampilkan Rute</button>
+                            <button id="showRouteButton" class="btn btn-success">
+                                Lihat Rute di Google Maps
+                            </button>
                         </div>
+
+                        <script>
+                            document.getElementById("showRouteButton").addEventListener("click", function() {
+                                // Cek apakah browser mendukung Geolocation API
+                                if ("geolocation" in navigator) {
+                                    navigator.geolocation.getCurrentPosition(function(position) {
+                                        const kurirLatitude = position.coords.latitude; // Mendapatkan latitude saat ini
+                                        const kurirLongitude = position.coords.longitude; // Mendapatkan longitude saat ini
+
+                                        const pesananLatitude = {{ $pesanan->latitude / 1000000 }}; // Latitude pengguna
+                                        const pesananLongitude = {{ $pesanan->longitude / 1000000 }}; // Longitude pengguna
+
+                                        // Membuka Google Maps dengan rute dari posisi kurir ke tujuan
+                                        const googleMapsUrl =
+                                            `https://www.google.com/maps/dir/?api=1&origin=${kurirLatitude},${kurirLongitude}&destination=${pesananLatitude},${pesananLongitude}`;
+                                        window.open(googleMapsUrl, '_blank');
+                                    }, function(error) {
+                                        alert("Error mendapatkan lokasi Anda. Pastikan GPS diaktifkan.");
+                                    });
+                                } else {
+                                    alert("Geolocation tidak didukung oleh browser ini.");
+                                }
+                            });
+                        </script>
                     @endif
 
                     <!-- Tombol Cetak Struk PDF hanya untuk staff -->
@@ -127,23 +169,16 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine/dist/lrm-translation-id.min.js"></script> <!-- Indonesian Translation -->
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/lrm-translation-id.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Kurir's default position (for example purposes, you can modify this if needed)
-            const kurirPosition = [-3.7603971992778313, 102.27822456249069];
-
-            // User's location from the pesanan model
+            const kurirPosition = [-3.7603971992778313, 102.27822456249069]; // Default kurir position
             const userPosition = [
                 {{ $pesanan->latitude / 1000000 }},
                 {{ $pesanan->longitude / 1000000 }}
             ];
-
-            // User's name from the model
-            const userName =
-                "{{ $pesanan->user->name }}"; // Assuming you have a user object related to the pesanan
 
             const map = L.map('map').setView(kurirPosition, 13);
             L.tileLayer(
@@ -163,20 +198,18 @@
 
             // Add marker for user with the user's name
             const userMarker = L.marker(userPosition).addTo(map).bindPopup(
-                "<strong>" + userName + "</strong><br>" +
-                "Rumah " + userName
+                "<strong>" + "{{ $pesanan->user->name }}" + "</strong><br>" +
+                "Rumah " + "{{ $pesanan->user->name }}"
             );
 
             let routeControl;
 
             // Function to calculate and display the route
             function showRoute() {
-                // If a route already exists, remove it
                 if (routeControl) {
                     routeControl.remove();
                 }
 
-                // Add a route from kurir to user
                 routeControl = L.Routing.control({
                     waypoints: [
                         L.latLng(kurirPosition),
@@ -193,12 +226,6 @@
                     showRoute();
                 });
             }
-
-            // Prevent adding markers or interactions on map click
-            map.on("click", function(e) {
-                // Silently handle the click event without adding markers or showing alerts
-                console.log("Map clicked at: ", e.latlng); // Optional: Log the click position for debugging
-            });
 
             // Update location information for user
             updateLocationInfo(userPosition[0], userPosition[1]);
@@ -223,15 +250,10 @@
 @endsection
 
 @push("css")
-    <!-- Include Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-    <!-- Include Leaflet Control Geocoder CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
-    <!-- Include Leaflet Routing Machine CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 @endpush

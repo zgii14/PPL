@@ -40,4 +40,8 @@ class PaketLaundry extends Model
     {
         return $this->hasMany(Pesanan::class, 'paket_id');
     }
+    public function riwayat()
+    {
+        return $this->hasMany(Riwayat::class, 'paket_id');
+    }
 }

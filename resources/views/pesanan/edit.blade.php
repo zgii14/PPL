@@ -55,8 +55,29 @@
                         <div class="mb-3">
                             <label for="jumlah" class="form-label">Jumlah</label>
                             <input type="number" name="jumlah" class="form-control @error("jumlah") is-invalid @enderror"
-                                value="{{ old("jumlah", $pesanan->jumlah) }}" min="1" required>
+                                value="{{ old("jumlah", $pesanan->jumlah) }}" min="1" step="0.01"required>
                             @error("jumlah")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Keterangan (Diantar / Diambil) -->
+                        <div class="mb-3">
+                            <label for="keterangan" class="form-label">Keterangan</label>
+                            <select name="keterangan" id="keterangan"
+                                class="form-control @error("keterangan") is-invalid @enderror" required>
+                                <option value="Diambil"
+                                    {{ old("keterangan", $pesanan->keterangan) == "Diambil" ? "selected" : "" }}>Diambil
+                                </option>
+                                <option value="Diantar"
+                                    {{ old("keterangan", $pesanan->keterangan) == "Diantar" ? "selected" : "" }}>Diantar
+                                </option>
+                                <option value="Diambil Sendiri"
+                                    {{ old("keterangan", $pesanan->keterangan) == "Diambil Sendiri" ? "selected" : "" }}>
+                                    Diambil Sendiri</option>
+
+                            </select>
+                            @error("keterangan")
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -74,24 +95,6 @@
                                     location information</span></p>
                         </div>
 
-                        <!-- Keterangan (Diantar / Diambil) -->
-                        <div class="mb-3">
-                            <label for="keterangan" class="form-label">Keterangan</label>
-                            <select name="keterangan" id="keterangan"
-                                class="form-control @error("keterangan") is-invalid @enderror" required>
-                                <option value="Diambil" {{ $pesanan->keterangan == "Diambil" ? "selected" : "" }}>Diambil
-                                </option>
-                                <option value="Diantar" {{ $pesanan->keterangan == "Diantar" ? "selected" : "" }}>Diantar
-                                </option>
-                                <option value="Diambil Sendiri"
-                                    {{ $pesanan->keterangan == "Diambil Sendiri" ? "selected" : "" }}>Diambil Sendiri
-                                </option>
-                            </select>
-                            @error("keterangan")
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                         <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
                     </form>
@@ -105,21 +108,27 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const initialLat = parseFloat(document.getElementById('latitude').value) || -3.7889;
-            const initialLng = parseFloat(document.getElementById('longitude').value) || 102.2655;
+            // Ambil koordinat latitude dan longitude yang sudah dikirim dari controller
+            const initialLat = {{ $latitude }}; // Menggunakan latitude yang sudah dikonversi ke desimal
+            const initialLng = {{ $longitude }}; // Menggunakan longitude yang sudah dikonversi ke desimal
 
+            // Inisialisasi peta dengan posisi awal
             const map = L.map('map').setView([initialLat, initialLng], 13);
 
+            // TileLayer OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
+            // Tambahkan control geocoder
             L.Control.geocoder().addTo(map);
 
+            // Marker yang bisa dipindah, dengan posisi awal dari latitude dan longitude yang sudah ada
             const destinationMarker = L.marker([initialLat, initialLng], {
                 draggable: true
             }).addTo(map);
 
+            // Fungsi untuk memperbarui informasi lokasi
             function updateLocationInfo(lat, lng) {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                     .then(response => response.json())
@@ -134,6 +143,7 @@
                     });
             }
 
+            // Ketika marker digerakkan, update latitude, longitude dan info lokasi
             destinationMarker.on('dragend', function(e) {
                 const {
                     lat,
@@ -144,6 +154,7 @@
                 updateLocationInfo(lat, lng);
             });
 
+            // Ketika peta di-click, pindahkan marker dan update nilai latitude, longitude
             map.on('click', function(e) {
                 const {
                     lat,
@@ -155,6 +166,7 @@
                 updateLocationInfo(lat, lng);
             });
 
+            // Set lokasi awal dan tampilkan info lokasi
             updateLocationInfo(initialLat, initialLng);
         });
     </script>

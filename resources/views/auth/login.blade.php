@@ -15,7 +15,7 @@
         <!-- inject:css -->
         <link rel="stylesheet" href="{{ asset("asset/css/vertical-layout-light/style.css") }}">
         <!-- endinject -->
-        <link href="{{ asset("asset/images/logo-himatif.png") }}" rel="shortcut icon">
+        <link href="{{ asset("asset/images/laundry_lubis.png") }}" rel="shortcut icon">
     </head>
 
     <body>

@@ -6,8 +6,8 @@ use App\Http\Controllers\PaketLaundryController;
 use App\Models\Pesanan;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\KurirController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\LocationController;
+use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\RiwayatUserController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -129,7 +129,7 @@ Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'
 Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');
 Route::patch('/pesanan/{id}/update-jumlah', [PesananController::class, 'updateJumlah'])->name('pesanan.update-jumlah');
 
-// Menentukan middleware 'roleCheck' untuk memastikan hanya 'kurir' yang bisa mengakses
+
 // web.php (Route)
 // Kurir-specific routes
 Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
@@ -137,8 +137,12 @@ Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
     Route::patch('/pesanan/{id}/status', [KurirController::class, 'updateStatus'])->name('kurir.pesanan.updateStatus');
     Route::post('/pesanan/{id}/konfirmasi-bayar', [KurirController::class, 'konfirmasiBayar'])->name('kurir.pesanan.konfirmasiBayar');
 });
-Route::get('/kurir/{kurir_id}/location', [LocationController::class, 'getKurirLocation'])->name('kurir.get-location');
 
+Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat.index');
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
     Route::get('/laporan-bulanan', [PesananController::class, 'laporanBulanan'])->name('laporan.bulanan');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/riwayat-saya', [RiwayatUserController::class, 'index'])->name('riwayat.saya');
 });

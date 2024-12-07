@@ -1,129 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Laporan Bulanan</title>
         <style>
+            /* General Reset */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            /* Body Styling */
             body {
                 font-family: Arial, sans-serif;
-                margin: 20px;
-                font-size: 14px;
+                padding: 15px;
                 color: #333;
             }
 
+            /* Header Styling */
             h1 {
                 text-align: center;
-                font-size: 20px;
+                font-size: 22px;
+                margin-bottom: 5px;
             }
 
-            p {
+            h4 {
                 text-align: center;
-                font-size: 14px;
-                margin-bottom: 20px;
+                font-size: 16px;
+                color: #555;
+                margin-bottom: 15px;
             }
 
+            hr {
+                margin: 10px 0;
+                border: none;
+                height: 1px;
+                background-color: #555;
+            }
+
+            /* Table Styling */
             table {
                 width: 100%;
+                border: 1px solid #ddd;
                 border-collapse: collapse;
-                margin-top: 20px;
+                margin: 10px 0;
+                font-size: 14px;
             }
 
-            table,
             th,
             td {
                 border: 1px solid #ddd;
-            }
-
-            th,
-            td {
                 padding: 8px;
-                text-align: left;
-            }
-
-            tr.subtotal-row {
-                background-color: #f9f9f9;
-            }
-
-            footer {
-                margin-top: 30px;
-                font-size: 12px;
-                color: #555;
                 text-align: center;
             }
 
-            .summary {
-                margin-top: 20px;
+            th {
+                background-color: #555;
+                color: white;
             }
 
-            .summary ul {
-                list-style: none;
-                padding: 0;
+            tbody tr:nth-child(odd) {
+                background-color: #f9f9f9;
             }
 
-            .summary li {
-                margin-bottom: 5px;
+            /* Total Container */
+            .total-container {
+                margin-top: 15px;
+                font-size: 16px;
+                font-weight: bold;
+                text-align: right;
+            }
+
+            /* Responsive Styles */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 20px;
+                }
+
+                table th,
+                table td {
+                    font-size: 12px;
+                }
             }
         </style>
     </head>
 
     <body>
+        <!-- Main Report Title Section -->
         <h1>Laporan Bulanan</h1>
-        <p>Bulan: {{ now()->format("F Y") }}</p>
+        <h4>Bulan: {{ \Carbon\Carbon::create($tahun, $bulan)->format("F") }} Tahun: {{ $tahun }}</h4>
+        <hr />
 
-        <!-- Tabel Laporan -->
+        <!-- Data Table -->
         <table>
             <thead>
                 <tr>
-                    <th>Nama Pelanggan</th>
-                    <th>Nama Paket</th>
-                    <th>Tanggal Pesanan</th>
-                    <th>Jumlah (Kg)</th>
+                    <th>No</th>
+                    <th>Nama Pengguna</th>
+                    <th>Paket Laundry</th>
+                    <th>Jumlah (kg)</th>
                     <th>Total Harga</th>
+                    <th>Tanggal</th>
                 </tr>
             </thead>
             <tbody>
+                @php $no = 1; @endphp
                 @foreach ($laporan as $item)
-                    <tr>
-                        <td rowspan="{{ $item["pesanan"]->count() }}">{{ $item["user"] }}</td>
-                        @foreach ($item["pesanan"] as $index => $pesanan)
-                            @if ($index > 0)
-                    <tr>
-                @endif
-                <td>{{ $pesanan["paket"] }}</td>
-                <td>{{ \Carbon\Carbon::parse($pesanan["created_at"])->format("d-m-Y") }}</td>
-                <td>{{ $pesanan["jumlah"] }} Kg</td>
-                <td>Rp {{ number_format($pesanan["total_harga"], 0, ",", ".") }}</td>
-                </tr>
-                @endforeach
-                <tr class="subtotal-row">
-                    <td colspan="4"><strong>Subtotal:</strong></td>
-                    <td><strong>Rp {{ number_format($item["subtotal"], 0, ",", ".") }}</strong></td>
-                </tr>
+                    @foreach ($item["pesanan"] as $index => $pesanan)
+                        <tr>
+                            <td>
+                                @if ($index == 0)
+                                    {{ $no++ }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>
+                                @if ($index == 0)
+                                    {{ $item["user"] }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ $pesanan["paket"] }}</td>
+                            <td>{{ $pesanan["jumlah"] }} kg</td>
+                            <td>Rp {{ number_format($pesanan["total_harga"], 0, ",", ".") }}</td>
+                            <td>{{ \Carbon\Carbon::parse($pesanan["tanggal"])->format("d-m-Y H:i") }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4"><strong>Total Keseluruhan:</strong></td>
-                    <td><strong>Rp {{ number_format($totalKeseluruhan, 0, ",", ".") }}</strong></td>
-                </tr>
-            </tfoot>
         </table>
 
-        <!-- Ringkasan -->
-        <div class="summary">
-            <ul>
-                <li><strong>Total Pesanan:</strong> {{ $laporan->sum(fn($item) => $item["pesanan"]->count()) }}</li>
-                <li><strong>Total Pendapatan:</strong> Rp {{ number_format($totalKeseluruhan, 0, ",", ".") }}</li>
-            </ul>
+        <!-- Total Keseluruhan -->
+        <div class="total-container">
+            Total Keseluruhan: Rp {{ number_format($totalKeseluruhan, 0, ",", ".") }}
         </div>
-
-        <!-- Footer -->
-        <footer>
-            <p>Laporan ini dibuat oleh {{ auth()->user()->name }} pada {{ now()->format("d-m-Y H:i") }}.</p>
-            <p>© {{ now()->year }} Laundry Lubis. Semua hak cipta dilindungi.</p>
-        </footer>
     </body>
 
 </html>

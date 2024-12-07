@@ -86,7 +86,7 @@
                                                         <!-- Edit and Delete buttons are hidden for pelanggan -->
                                                         @if (auth()->user()->role !== "kurir" && auth()->user()->role !== "staf")
                                                             @if (auth()->user()->role == "admin")
-                                                                <a href="{{ route("pesanan.edit", $item->id) }}"
+                                                                <a href="{{ route("paket-laundry.edit", $item->id) }}"
                                                                     class="btn btn-warning btn-sm" title="Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>

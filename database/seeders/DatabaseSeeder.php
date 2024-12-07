@@ -51,37 +51,37 @@ class DatabaseSeeder extends Seeder
             [
                 'nama_paket' => 'Paket Cuci Lipat',
                 'deskripsi' => 'Cuci pakaian dan dilipat rapi.',
-                'harga' => 15000,
+                'harga' => 6000,
                 'jenis' => 'Regular',
                 'waktu' => 24, // Store as 24 hours (1 day)
             ],
             [
                 'nama_paket' => 'Paket Cuci Kering',
                 'deskripsi' => 'Pakaian dicuci dan dikeringkan.',
-                'harga' => 20000,
+                'harga' => 5000,
                 'jenis' => 'Regular',
                 'waktu' => 24, // Store as 24 hours
             ],
             [
                 'nama_paket' => 'Paket Express Cuci Kering Lipat',
                 'deskripsi' => 'Layanan express cuci, kering, dan lipat.',
-                'harga' => 30000,
+                'harga' => 8000,
                 'jenis' => 'Express',
                 'waktu' => 6,  // Store as 6 hours
             ],
             [
                 'nama_paket' => 'Paket Cuci Setrika',
                 'deskripsi' => 'Pakaian dicuci dan disetrika.',
-                'harga' => 25000,
+                'harga' => 7000,
                 'jenis' => 'Regular',
                 'waktu' => 24, // Store as 24 hours
             ],
             [
                 'nama_paket' => 'Paket Premium',
                 'deskripsi' => 'Layanan cuci, setrika, dan parfum khusus.',
-                'harga' => 40000,
+                'harga' => 10000,
                 'jenis' => 'Premium',
-                'waktu' => 48, // Store as 48 hours (2 days)
+                'waktu' => 10, // Store as 48 hours (2 days)
             ],
         ];
 

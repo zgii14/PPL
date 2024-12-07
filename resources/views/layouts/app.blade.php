@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="{{ asset("css/style.css") }}" />
         <link rel="stylesheet" href="{{ asset("css/components.css") }}" />
         <link rel="stylesheet" href="{{ asset("css/custom.css") }}" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         @stack("css")
     </head>
@@ -74,7 +75,7 @@
                 </div>
                 <footer class="main-footer">
                     <div class="footer-left">
-                        Copyright &copy; 2024<div class="bullet"></div>By <a href="https://github.com/Anjasfedo/"
+                        Copyright &copy; 2024<div class="bullet"></div>By <a href="https://github.com/zgiii14/"
                             target="_blank">Laundry Lubis</a>
                     </div>
                 </footer>

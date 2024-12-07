@@ -13,10 +13,10 @@
             </li>
         </ul>
     </li>
-    <li class="menu-header">Manajemen Laporan</li>
+    <li class="menu-header">Manajemen Pemesanan</li>
     <li class="nav-item dropdown">
         <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="far fa-file-alt"></i>
-            <span>Laporan Transaksi</span></a>
+            <span>Data Pesanan</span></a>
         <ul class="dropdown-menu">
 
             <li>
@@ -33,6 +33,24 @@
 
             @if (Auth::user()->role == "kurir")
                 <li><a class="nav-link" href="{{ route("kurir.pesanan.index") }}">Data Kurir</a></li>
+            @endif
+        </ul>
+    </li>
+    <li class="menu-header">Manejemen Transaksi</li>
+    <li class="nav-item dropdown">
+        <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="far fa-file-alt"></i>
+            <span>Data Transaksi</span></a>
+        <ul class="dropdown-menu">
+            @if (Auth::user()->role == "admin" || Auth::user()->role == "staff")
+                <li>
+                    <a class="nav-link" href="{{ route("riwayat.index") }}">Riwayat Transaksi</a>
+                </li>
+            @endif
+            @if (Auth::user()->role == "pelanggan")
+                <li>
+                    <a class="nav-link" href="{{ route("riwayat.saya") }}">Riwayat Pesanan Saya</a>
+
+                </li>
             @endif
         </ul>
     </li>
