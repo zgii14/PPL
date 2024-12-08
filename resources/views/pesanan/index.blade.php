@@ -224,20 +224,19 @@
                                                                 <i class="fas fa-check"></i>
                                                             </a>
                                                         @endif
-
                                                         @if (auth()->user()->role === "staff" || auth()->user()->role === "kurir")
                                                             @if ($item->user->phone)
                                                                 @if ($item->status == 5)
-                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Pesanan Anda dengan Paket " . $item->paket->nama_paket . " sedang dalam proses diantar dan akan segera sampai.") }}"
+                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin menginformasikan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _Proses Pengantaran_. Mohon ditunggu, kurir kami akan segera tiba di lokasi Anda. Terima kasih telah mempercayakan layanan laundry Anda kepada *Laundry Lubis*!") }}"
                                                                         target="_blank" class="btn btn-success btn-sm"
                                                                         title="Chat via WhatsApp">
-                                                                        <i class="fab fa-whatsapp"></i> Diantar
+                                                                        <i class="fab fa-whatsapp"></i>
                                                                     </a>
                                                                 @elseif ($item->status == 2)
-                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Pesanan Anda dengan Paket " . $item->paket->nama_paket . " sedang dalam proses dijemput.") }}"
+                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin memberitahukan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _proses penjemputan_. Kurir kami akan segera sampai di lokasi Anda. Terima kasih atas kepercayaan Anda kepada *Laundry Lubis*!") }}"
                                                                         target="_blank" class="btn btn-success btn-sm"
                                                                         title="Chat via WhatsApp">
-                                                                        <i class="fab fa-whatsapp"></i> Dijemput
+                                                                        <i class="fab fa-whatsapp"></i>
                                                                     </a>
                                                                 @endif
                                                             @else
@@ -246,6 +245,7 @@
                                                                 </span>
                                                             @endif
                                                         @endif
+
                                                     </div>
                                                 </td>
 
