@@ -19,61 +19,90 @@
                                 @csrf
                                 @method("PUT")
 
+                                <!-- Nama -->
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Nama</label>
-                                    <input type="text" name="name" id="name" class="form-control"
+                                    <input type="text" name="name" id="name"
+                                        class="form-control @error("name") is-invalid @enderror"
                                         value="{{ old("name", $user->name) }}" required>
                                     @error("name")
-                                        <div class="text-danger small">{{ $message }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
+                                <!-- Email -->
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" name="email" id="email" class="form-control"
+                                    <input type="email" name="email" id="email"
+                                        class="form-control @error("email") is-invalid @enderror"
                                         value="{{ old("email", $user->email) }}" required>
                                     @error("email")
-                                        <div class="text-danger small">{{ $message }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
+                                <!-- Nomor HP -->
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Nomor HP</label>
+                                    <input type="text" name="phone" id="phone"
+                                        class="form-control @error("phone") is-invalid @enderror"
+                                        value="{{ old("phone", $user->phone) }}" required
+                                        placeholder="Contoh: 081234567890">
+                                    @error("phone")
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <!-- Password -->
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password (Opsional)</label>
-                                    <input type="password" name="password" id="password" class="form-control">
-                                    <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
+                                    <input type="password" name="password" id="password"
+                                        class="form-control @error("password") is-invalid @enderror"
+                                        placeholder="Kosongkan jika tidak ingin mengubah password">
                                     @error("password")
-                                        <div class="text-danger small">{{ $message }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah
+                                        password.</small>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="role" class="form-label">Role</label>
-                                    <select name="role" id="role" class="form-control" required>
-                                        <option value="{{ \App\Models\User::ROLE_ADMIN }}"
-                                            {{ $user->role === \App\Models\User::ROLE_ADMIN ? "selected" : "" }}>
-                                            {{ ucfirst(strtolower(\App\Models\User::ROLE_ADMIN)) }}
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_STAFF }}"
-                                            {{ $user->role === \App\Models\User::ROLE_STAFF ? "selected" : "" }}>
-                                            {{ ucfirst(strtolower(\App\Models\User::ROLE_STAFF)) }}
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_PELANGGAN }}"
-                                            {{ $user->role === \App\Models\User::ROLE_PELANGGAN ? "selected" : "" }}>
-                                            {{ ucfirst(strtolower(\App\Models\User::ROLE_PELANGGAN)) }}
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_KURIR }}"
-                                            {{ $user->role === \App\Models\User::ROLE_KURIR ? "selected" : "" }}>
-                                            {{ ucfirst(strtolower(\App\Models\User::ROLE_KURIR)) }}
-                                        </option>
-                                    </select>
-                                    @error("role")
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                <!-- Role -->
+                                @if (Auth::user()->role === \App\Models\User::ROLE_ADMIN)
+                                    <div class="mb-3">
+                                        <label for="role" class="form-label">Role</label>
+                                        <select name="role" id="role"
+                                            class="form-control @error("role") is-invalid @enderror" required>
+                                            <option value="{{ \App\Models\User::ROLE_ADMIN }}"
+                                                {{ old("role", $user->role) === \App\Models\User::ROLE_ADMIN ? "selected" : "" }}>
+                                                Admin
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_STAFF }}"
+                                                {{ old("role", $user->role) === \App\Models\User::ROLE_STAFF ? "selected" : "" }}>
+                                                Staff
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_PELANGGAN }}"
+                                                {{ old("role", $user->role) === \App\Models\User::ROLE_PELANGGAN ? "selected" : "" }}>
+                                                Pelanggan
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_KURIR }}"
+                                                {{ old("role", $user->role) === \App\Models\User::ROLE_KURIR ? "selected" : "" }}>
+                                                Kurir
+                                            </option>
+                                        </select>
+                                        @error("role")
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                @endif
+                                @if (Auth::user()->role !== \App\Models\User::ROLE_ADMIN)
+                                    <input type="hidden" name="role" value="{{ $user->role }}">
+                                @endif
 
+                                <!-- Submit -->
                                 <button type="submit" class="btn btn-primary">
                                     Update Pengguna
                                 </button>
+                                <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
                             </form>
                         </div>
                     </div>

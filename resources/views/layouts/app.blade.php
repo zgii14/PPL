@@ -46,8 +46,6 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <div class="dropdown-title">Logged in </div>
-                                <a href="" class="dropdown-item has-icon"><i class="far fa-user"></i> Profile</a>
-                                <div class="dropdown-divider"></div>
                                 <form action="{{ route("logout") }}" method="POST">
                                     @csrf
                                     <button type="submit"

@@ -40,7 +40,19 @@ class RiwayatController extends Controller
 
         return view('riwayat.index', compact('riwayats'));
     }
-    
+    public function destroy($id)
+{
+    // Cek apakah pengguna yang login adalah admin
+    if (auth()->user()->role !== 'admin') {
+        return redirect()->route('riwayat.index')->with('error', 'Anda tidak memiliki izin untuk menghapus riwayat.');
+    }
+
+    $riwayat = Riwayat::findOrFail($id);
+    $riwayat->delete();
+
+    return redirect()->route('riwayat.index')->with('success', 'Riwayat berhasil dihapus.');
+}
+
 
 
 }

@@ -20,9 +20,13 @@
                             <label for="paket_id" class="form-label">Pilih Paket Laundry</label>
                             <select name="paket_id" id="paket_id"
                                 class="form-control @error("paket_id") is-invalid @enderror">
+                                <option value="">Pilih Paket</option>
                                 @foreach ($paket as $item)
-                                    <option value="{{ $item->id }}">{{ $item->nama_paket }} - Rp
-                                        {{ number_format($item->harga, 2) }} ({{ $item->waktu_formatted }})</option>
+                                    <option value="{{ $item->id }}"
+                                        {{ old("paket_id") == $item->id ? "selected" : "" }}>
+                                        {{ $item->nama_paket }} - Rp {{ number_format($item->harga, 2) }}
+                                        ({{ $item->waktu_formatted }})
+                                    </option>
                                 @endforeach
                             </select>
                             @error("paket_id")
@@ -30,7 +34,7 @@
                             @enderror
                         </div>
 
-                        <!-- Tipe Pelanggan (This part will only show for Admins, not for regular users) -->
+                        <!-- Tipe Pelanggan -->
                         @if (auth()->user()->role !== "pelanggan")
                             <div class="mb-3">
                                 <label for="tipe" class="form-label">Tipe Pelanggan</label>
@@ -45,63 +49,59 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        @endif
-
-                        <!-- Select Existing User (Only visible if user is not a regular user) -->
-                        @if (auth()->user()->role !== "pelanggan")
-                            <div id="user_select" class="mb-3" style="display:none;">
-                                <label for="user_id" class="form-label">Nama Pelanggan</label>
-                                <select name="user_id" id="user_id"
-                                    class="form-control @error("user_id") is-invalid @enderror">
-                                    <option value="">Pilih Pelanggan</option>
-                                    @foreach ($users as $user)
-                                        <option value="{{ $user->id }}"
-                                            {{ old("user_id") == $user->id ? "selected" : "" }}>{{ $user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error("user_id")
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Input New User -->
-                            <div id="user_create" class="mb-3" style="display:none;">
-                                <label for="new_user_name" class="form-label">Nama Pelanggan Baru</label>
-                                <input type="text" name="new_user_name" id="new_user_name"
-                                    class="form-control @error("new_user_name") is-invalid @enderror"
-                                    placeholder="Masukkan Nama Pelanggan Baru" value="{{ old("new_user_name") }}">
-                                @error("new_user_name")
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
                         @else
-                            <!-- Automatically select the logged-in user if the role is 'pelanggan' -->
-                            <div id="user_select" class="mb-3">
-                                <label for="user_id" class="form-label">Nama Pelanggan</label>
-                                <select name="user_id" id="user_id"
-                                    class="form-control @error("user_id") is-invalid @enderror" disabled>
-                                    <option value="{{ auth()->user()->id }}" selected>{{ auth()->user()->name }}</option>
-                                </select>
-                                @error("user_id")
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Hidden user_id field for regular users -->
-                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-
-                            <!-- Automatically set tipe for pelanggan -->
                             <input type="hidden" name="tipe" value="select">
                         @endif
 
+                        <!-- Select Existing User -->
+                        <div id="user_select" class="mb-3" style="display: none;">
+                            <label for="user_id" class="form-label">Pilih Pelanggan</label>
+                            <select name="user_id" id="user_id"
+                                class="form-control @error("user_id") is-invalid @enderror">
+                                <option value="">Pilih Pelanggan</option>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->id }}"
+                                        {{ old("user_id") == $user->id ? "selected" : "" }}>
+                                        {{ $user->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error("user_id")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Input New User -->
+                        <div id="user_create" class="mb-3" style="display: none;">
+                            <label for="new_user_name" class="form-label">Nama Pelanggan Baru</label>
+                            <input type="text" name="new_user_name" id="new_user_name"
+                                class="form-control @error("new_user_name") is-invalid @enderror"
+                                placeholder="Masukkan Nama Pelanggan Baru" value="{{ old("new_user_name") }}">
+                            @error("new_user_name")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <label for="phone" class="form-label mt-3">Nomor Telepon</label>
+                            <input type="text" name="phone" id="phone"
+                                class="form-control @error("phone") is-invalid @enderror"
+                                placeholder="Masukkan Nomor Telepon Baru" value="{{ old("phone") }}">
+                            @error("phone")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Hidden Field for User ID -->
+                        @if (auth()->user()->role === "pelanggan")
+                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                        @endif
+
                         <!-- Quantity -->
-                        <!-- Quantity (Only for staff, not regular users) -->
-                        @if (auth()->user()->role !== "pelanggan")
+                        <!-- Input Jumlah hanya jika user adalah staff -->
+                        @if (auth()->user()->role === "staff")
                             <div class="mb-3">
                                 <label for="jumlah" class="form-label">Jumlah</label>
                                 <input type="number" name="jumlah"
-                                    class="form-control @error("jumlah") is-invalid @enderror" min="1" step="0.01"
+                                    class="form-control @error("jumlah") is-invalid @enderror" min="1" step="0.1"
                                     placeholder="Masukkan jumlah" value="{{ old("jumlah") }}">
                                 @error("jumlah")
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -109,6 +109,7 @@
                             </div>
                         @endif
 
+                        <!-- Keterangan -->
                         <div class="form-group">
                             <label for="keterangan">Keterangan</label>
                             <select name="keterangan" id="keterangan" class="form-control" required>
@@ -118,37 +119,37 @@
                                 </option>
                                 <option value="Diambil" {{ old("keterangan") == "Diambil" ? "selected" : "" }}>Diambil (
                                     Pesanan akan dijemput dan akan diambil sendiri)
+                                </option>
                                 <option value="Diambil Sendiri"
                                     {{ old("keterangan") == "Diambil Sendiri" ? "selected" : "" }}>Antar & Ambil sendiri (
-                                    Pesanan akan diantar dan diambil sendiri )
-                                </option>
+                                    Pesanan akan diantar dan diambil sendiri oleh pelanggan)</option>
                             </select>
                             @error("keterangan")
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                </div>
 
-                <!-- Location (Latitude and Longitude) -->
-                <div class="mb-3">
-                    <label for="location" class="form-label">Pilih Lokasi</label>
-                    <div id="map" style="height: 400px; width: 100%;"></div>
-                    <input type="hidden" id="latitude" name="latitude" value="{{ old("latitude") }}">
-                    <input type="hidden" id="longitude" name="longitude" value="{{ old("longitude") }}">
-                    <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the
-                            location information</span></p>
-                    @error("latitude")
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    @error("longitude")
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Pilih Lokasi</label>
+                            <div id="map" style="height: 400px; width: 100%;"></div>
+                            <input type="hidden" id="latitude" name="latitude" value="{{ old("latitude") }}">
+                            <input type="hidden" id="longitude" name="longitude" value="{{ old("longitude") }}">
+                            <p><strong>Location Information:</strong> <span id="location-info">Click on the map to get the
+                                    location information</span></p>
+                            @error("latitude")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error("longitude")
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                <button type="submit" class="btn btn-primary">Buat Pesanan</button>
-                </form>
+                        <button type="submit" class="btn btn-primary">Buat Pesanan</button>
+                        <a href="{{ route("pesanan.index") }}" class="btn btn-secondary">Kembali</a>
+                    </form>
+                </div>
             </div>
-        </div>
         </div>
     </section>
 

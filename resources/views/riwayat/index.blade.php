@@ -67,6 +67,9 @@
                                 <th>Status</th>
                                 <th>Pembayaran</th>
                                 <th>Tanggal Pemesanan</th>
+                                @if (auth()->user()->role === "admin")
+                                    <th>Aksi</th> <!-- Kolom aksi hanya untuk admin -->
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -80,13 +83,30 @@
                                     <td>{{ $riwayat->status }}</td>
                                     <td>{{ ucfirst($riwayat->pembayaran_status) ?? "Belum Dibayar" }}</td>
                                     <td>{{ $riwayat->created_at->format("d-m-Y H:i") }}</td>
+                                    @if (auth()->user()->role === "admin")
+                                        <td>
+                                            <!-- Tombol Hapus -->
+                                            <form action="{{ route("riwayat.destroy", $riwayat->id) }}" method="POST"
+                                                class="d-inline delete-form">
+                                                @csrf
+                                                @method("DELETE")
+                                                <button type="submit" class="btn btn-danger btn-sm px-2 py-1"
+                                                    title="Hapus Riwayat">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">Tidak ada riwayat pesanan yang tersedia</td>
+                                    <td colspan="{{ auth()->user()->role === "admin" ? 9 : 8 }}" class="text-center">
+                                        Tidak ada riwayat pesanan yang tersedia
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
 
@@ -97,4 +117,29 @@
             </div>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // SweetAlert for Delete confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-form').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: 'Data yang dihapus tidak dapat dipulihkan!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
 @endsection

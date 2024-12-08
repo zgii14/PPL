@@ -19,8 +19,10 @@
                             <h4>{{ $user->name }}</h4>
                         </div>
                         <div class="card-body">
+                            <!-- Detail Pengguna -->
                             <p><strong>Nama:</strong> {{ $user->name }}</p>
                             <p><strong>Email:</strong> {{ $user->email }}</p>
+                            <p><strong>Nomor HP:</strong> {{ $user->phone ?? "-" }}</p>
                             <p><strong>Role:</strong>
                                 @if ($user->role === "admin")
                                     <span class="badge badge-danger">{{ ucwords(strtolower($user->role)) }}</span>
@@ -49,32 +51,35 @@
                             <h4>Pesanan Pengguna</h4>
                         </div>
                         <div class="card-body">
-                            <p>Data Pesanan Pengguna</p>
-                            {{-- Orders table --}}
-                            <div class="table-responsive">
-                                <table class="table-striped table">
-                                    <thead>
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Paket</th>
-                                            <th>Status</th>
-                                            <th>Total Harga</th>
-                                            <th>Waktu Selesai</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($user->pesanan as $pesanan)
+                            @if ($user->pesanan->isEmpty())
+                                <p class="text-muted">Pengguna ini belum memiliki pesanan.</p>
+                            @else
+                                <!-- Tabel Pesanan -->
+                                <div class="table-responsive">
+                                    <table class="table-striped table">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $pesanan->id }}</td>
-                                                <td>{{ $pesanan->paket->nama_paket }}</td>
-                                                <td>{{ $pesanan->status_label }}</td>
-                                                <td>{{ number_format($pesanan->total_harga, 0, ",", ".") }}</td>
-                                                <td>{{ $pesanan->waktu_selesai }}</td>
+                                                <th>Order ID</th>
+                                                <th>Paket</th>
+                                                <th>Status</th>
+                                                <th>Total Harga</th>
+                                                <th>Waktu Selesai</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($user->pesanan as $pesanan)
+                                                <tr>
+                                                    <td>{{ $pesanan->id }}</td>
+                                                    <td>{{ $pesanan->paket->nama_paket }}</td>
+                                                    <td>{{ $pesanan->status_label }}</td>
+                                                    <td>{{ number_format($pesanan->total_harga, 0, ",", ".") }}</td>
+                                                    <td>{{ $pesanan->waktu_selesai ?? "-" }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

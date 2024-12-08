@@ -224,8 +224,31 @@
                                                                 <i class="fas fa-check"></i>
                                                             </a>
                                                         @endif
+
+                                                        @if (auth()->user()->role === "staff" || auth()->user()->role === "kurir")
+                                                            @if ($item->user->phone)
+                                                                @if ($item->status == 5)
+                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Pesanan Anda dengan Paket " . $item->paket->nama_paket . " sedang dalam proses diantar dan akan segera sampai.") }}"
+                                                                        target="_blank" class="btn btn-success btn-sm"
+                                                                        title="Chat via WhatsApp">
+                                                                        <i class="fab fa-whatsapp"></i> Diantar
+                                                                    </a>
+                                                                @elseif ($item->status == 2)
+                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Pesanan Anda dengan Paket " . $item->paket->nama_paket . " sedang dalam proses dijemput.") }}"
+                                                                        target="_blank" class="btn btn-success btn-sm"
+                                                                        title="Chat via WhatsApp">
+                                                                        <i class="fab fa-whatsapp"></i> Dijemput
+                                                                    </a>
+                                                                @endif
+                                                            @else
+                                                                <span class="text-muted" title="Nomor tidak tersedia">
+                                                                    <i class="fab fa-whatsapp"></i>
+                                                                </span>
+                                                            @endif
+                                                        @endif
                                                     </div>
                                                 </td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>

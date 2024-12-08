@@ -198,7 +198,7 @@
                     </div>
                     <div class="col-lg-7 mt-lg-0 pl-lg-5 mt-5">
                         <h6 class="text-secondary text-uppercase font-weight-medium mb-3">Kenali Kami Lebih Dekat</h6>
-                        <h1 class="mb-4">Penyedia Layanan Laundry Terpercaya di Kota Anda</h1>
+                        <h1 class="mb-4">Penyedia Layanan Laundry Terbaik di Kota Bengkulu!</h1>
                         <h5 class="font-weight-medium font-italic mb-4">Layanan terbaik dengan sentuhan yang penuh
                             perhatian, mengutamakan kualitas dan kenyamanan.</h5>
                         <p class="mb-2">Kami hadir untuk memberikan solusi laundry yang nyaman dan terpercaya.
@@ -349,7 +349,7 @@
                                 <p style="font-size: 15px;">Cuci pakaian dan dilipat rapi.</p>
                                 <p style="font-size: 14px; color: #777;">Durasi: 24 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 15.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 6.000 / Kg</h4>
                             <a href="{{ route("login") }}" class="btn btn-secondary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>
@@ -366,7 +366,7 @@
                                 <p style="font-size: 15px;">Pakaian dicuci dan dikeringkan.</p>
                                 <p style="font-size: 14px; color: #777;">Durasi: 24 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 20.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 5.000 / Kg</h4>
                             <a href="{{ route("login") }}" class="btn btn-primary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>
@@ -383,7 +383,7 @@
                                 <p style="font-size: 15px;">Layanan express cuci, kering, dan lipat.</p>
                                 <p style="font-size: 14px; color: #777;">Durasi: 6 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 30.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 8.000 / Kg</h4>
                             <a href="{{ route("login") }}" class="btn btn-secondary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>
@@ -400,7 +400,7 @@
                                 <p style="font-size: 15px;">Pakaian dicuci dan disetrika.</p>
                                 <p style="font-size: 14px; color: #777;">Durasi: 24 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 25.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 7.000 / Kg</h4>
                             <a href="{{ route("login") }}" class="btn btn-secondary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>
@@ -414,10 +414,10 @@
                             </div>
                             <h3 class="font-weight-bold mb-3">Paket Premium</h3>
                             <div class="d-flex flex-column align-items-center py-3">
-                                <p style="font-size: 15px;">Layanan cuci, setrika, dan parfum khusus.</p>
-                                <p style="font-size: 14px; color: #777;">Durasi: 48 Jam</p>
+                                <p style="font-size: 15px;">Layanan cuci premium, parfum premium.</p>
+                                <p style="font-size: 14px; color: #777;">Durasi: 10 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 40.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 10.000 / Kg</h4>
                             <a href="{{ route("login") }}" class="btn btn-primary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>
@@ -432,7 +432,7 @@
                                 <p style="font-size: 15px;">Cuci, setrika, dan tambahkan parfum .</p>
                                 <p style="font-size: 14px; color: #777;">Durasi: 24 Jam</p>
                             </div>
-                            <h4 class="font-weight-bold mb-4">Rp 30.000 / Pakaian</h4>
+                            <h4 class="font-weight-bold mb-4">Rp 15.000 / Pakaian</h4>
                             <a href="/login" class="btn btn-secondary px-4 py-2">Pesan Sekarang</a>
                         </div>
                     </div>

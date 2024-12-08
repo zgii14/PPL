@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 
 class WhatsAppNotifier
 {
+
     public static function sendNotification($phoneNumber, $message)
     {
         $client = new Client();

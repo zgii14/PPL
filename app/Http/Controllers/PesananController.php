@@ -90,6 +90,7 @@ class PesananController extends Controller
                 'new_user_name' => 'required|alpha_num|unique:users,name',
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
+                'phone' => 'required|digits_between:10,15|unique:users,phone', // Nomor telepon valid & unik
             ]);
         }
     
@@ -107,9 +108,10 @@ class PesananController extends Controller
     
             // Membuat user baru
             $user = User::create([
-                'name' => $sanitized_user_name,
-                'email' => strtolower($sanitized_user_name) . '@lubis.com', // Email dihasilkan dari nama
-                'password' => bcrypt($sanitized_user_name), // Password default
+              'name' => $sanitized_user_name,
+            'email' => strtolower($sanitized_user_name) . '@lubis.com', // Email dihasilkan dari nama
+            'password' => bcrypt($sanitized_user_name), // Password default
+            'phone' => $request->phone, // Menambahkan nomor telepon
             ]);
         } else {
             // Menggunakan user yang sudah ada

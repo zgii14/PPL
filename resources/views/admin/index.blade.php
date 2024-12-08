@@ -22,55 +22,57 @@
             </div>
         @endif
 
-        <!-- Filter and Search Section -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Filter Pengguna</h4>
-                    </div>
-                    <div class="card-body">
-                        <form method="GET" action="{{ route("admin.users.index") }}">
-                            <div class="row align-items-center">
-                                <div class="col-md-4 mb-md-0 mb-3">
-                                    <input type="text" name="search" class="form-control"
-                                        placeholder="Cari nama atau email" value="{{ request("search") }}">
+        <!-- Filter dan Search Section -->
+        @if (auth()->user()->role !== "pelanggan")
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Filter Pengguna</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" action="{{ route("admin.users.index") }}">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4 mb-md-0 mb-3">
+                                        <input type="text" name="search" class="form-control"
+                                            placeholder="Cari nama atau email" value="{{ request("search") }}">
+                                    </div>
+                                    <div class="col-md-3 mb-md-0 mb-3">
+                                        <select name="role" class="form-control">
+                                            <option value="">Pilih Role</option>
+                                            <option value="{{ \App\Models\User::ROLE_ADMIN }}"
+                                                {{ request("role") == \App\Models\User::ROLE_ADMIN ? "selected" : "" }}>
+                                                Admin
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_STAFF }}"
+                                                {{ request("role") == \App\Models\User::ROLE_STAFF ? "selected" : "" }}>
+                                                Staff
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_KURIR }}"
+                                                {{ request("role") == \App\Models\User::ROLE_KURIR ? "selected" : "" }}>
+                                                Kurir
+                                            </option>
+                                            <option value="{{ \App\Models\User::ROLE_PELANGGAN }}"
+                                                {{ request("role") == \App\Models\User::ROLE_PELANGGAN ? "selected" : "" }}>
+                                                Pelanggan
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search"></i> Filter
+                                        </button>
+                                        <a href="{{ route("admin.users.index") }}" class="btn btn-secondary">
+                                            <i class="fas fa-redo"></i> Reset
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-md-3 mb-md-0 mb-3">
-                                    <select name="role" class="form-control">
-                                        <option value="">Pilih Role</option>
-                                        <option value="{{ \App\Models\User::ROLE_ADMIN }}"
-                                            {{ request("role") == \App\Models\User::ROLE_ADMIN ? "selected" : "" }}>
-                                            Admin
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_STAFF }}"
-                                            {{ request("role") == \App\Models\User::ROLE_STAFF ? "selected" : "" }}>
-                                            Staff
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_KURIR }}"
-                                            {{ request("role") == \App\Models\User::ROLE_KURIR ? "selected" : "" }}>
-                                            Kurir
-                                        </option>
-                                        <option value="{{ \App\Models\User::ROLE_PELANGGAN }}"
-                                            {{ request("role") == \App\Models\User::ROLE_PELANGGAN ? "selected" : "" }}>
-                                            Pelanggan
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search"></i> Filter
-                                    </button>
-                                    <a href="{{ route("admin.users.index") }}" class="btn btn-secondary">
-                                        <i class="fas fa-redo"></i> Reset
-                                    </a>
-                                </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
         <!-- Users Table -->
         <div class="row">
@@ -130,7 +132,7 @@
                                                                 class="btn btn-warning btn-sm" title="Edit">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            @if (auth()->user()->role !== "pelanggan")
+                                                            @if (auth()->user()->role === "admin")
                                                                 <form
                                                                     action="{{ route("admin.users.destroy", $user->id) }}"
                                                                     method="POST" class="d-inline delete-form">

@@ -101,9 +101,22 @@ Route::put('users/{user}', function (Illuminate\Http\Request $request, App\Model
 
 // Delete User
 Route::delete('users/{user}', function (App\Models\User $user) {
+    // Cek apakah pengguna yang login adalah admin
+    if (auth()->user()->role !== 'admin') {
+        return redirect()->route('admin.users.index')->with('error', 'Anda tidak memiliki izin untuk menghapus pengguna.');
+    }
+
+    // Cegah admin menghapus dirinya sendiri
+    if (auth()->user()->id === $user->id) {
+        return redirect()->route('admin.users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+    }
+
+    // Hapus pengguna
     $user->delete();
+
     return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
 })->name('admin.users.destroy');
+
 
 Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth',]);
 // routes/web.php
@@ -147,5 +160,9 @@ Route::middleware(['auth','role:pelanggan'])->group(function () {
 });
 Route::middleware(['auth','role:admin,staff'])->group(function () {
     Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat.index');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::delete('riwayat/{id}', [RiwayatController::class, 'destroy'])->name('riwayat.destroy');
 });
 

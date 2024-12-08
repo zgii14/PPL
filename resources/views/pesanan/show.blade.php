@@ -30,6 +30,16 @@
                         <label><strong>Total Harga:</strong></label>
                         <p>Rp {{ number_format($pesanan->total_harga, 2, ",", ".") }}</p>
                     </div>
+                    <div class="form-group">
+                        <label><strong>Nomor HP Pelanggan:</strong></label>
+                        <p>
+                            @if ($pesanan->user->phone)
+                                {{ $pesanan->user->phone }}
+                            @else
+                                <span>Nomor HP tidak tersedia</span>
+                            @endif
+                        </p>
+                    </div>
 
                     <div class="form-group">
                         <label><strong>Tanggal Pemesanan:</strong></label>
@@ -68,7 +78,7 @@
                             <strong>Bukti Bayar:</strong>
                         </div>
                         <div>
-                            <img src="{{ $pesanan->pembayaran->bukti_bayar }}" alt="Bukti Bayar" class="img-fluid"
+                            <img src="{{ $pesanan->pembayaran->bukti_bayar }}" alt="Belum ada bukti bayar" class="img-fluid"
                                 style="max-width: 400px; max-height: 400px;">
                         </div>
                     @else
@@ -171,6 +181,7 @@
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/lrm-translation-id.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
