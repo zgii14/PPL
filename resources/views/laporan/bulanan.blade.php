@@ -97,11 +97,13 @@
             <thead>
                 <tr>
                     <th>No</th>
+
                     <th>Nama Pengguna</th>
                     <th>Paket Laundry</th>
                     <th>Jumlah (kg)</th>
                     <th>Total Harga</th>
                     <th>Tanggal</th>
+                    <th>Id pengguna</th>
                 </tr>
             </thead>
             <tbody>
@@ -127,6 +129,7 @@
                             <td>{{ $pesanan["jumlah"] }} kg</td>
                             <td>Rp {{ number_format($pesanan["total_harga"], 0, ",", ".") }}</td>
                             <td>{{ \Carbon\Carbon::parse($pesanan["tanggal"])->format("d-m-Y H:i") }}</td>
+                            <td>{{ $pesanan["id"] }}</td>
                         </tr>
                     @endforeach
                 @endforeach

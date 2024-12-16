@@ -46,8 +46,7 @@
                                     <label for="phone" class="form-label">Nomor HP</label>
                                     <input type="text" name="phone" id="phone"
                                         class="form-control @error("phone") is-invalid @enderror"
-                                        value="{{ old("phone", $user->phone) }}" required
-                                        placeholder="Contoh: 081234567890">
+                                        value="{{ old("phone", $user->phone) }}" placeholder="Contoh: 081234567890">
                                     @error("phone")
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -65,13 +64,11 @@
                                     <small class="form-text text-muted">Kosongkan jika tidak ingin mengubah
                                         password.</small>
                                 </div>
-
-                                <!-- Role -->
                                 @if (Auth::user()->role === \App\Models\User::ROLE_ADMIN)
                                     <div class="mb-3">
                                         <label for="role" class="form-label">Role</label>
                                         <select name="role" id="role"
-                                            class="form-control @error("role") is-invalid @enderror" required>
+                                            class="form-control @error("role") is-invalid @enderror">
                                             <option value="{{ \App\Models\User::ROLE_ADMIN }}"
                                                 {{ old("role", $user->role) === \App\Models\User::ROLE_ADMIN ? "selected" : "" }}>
                                                 Admin
@@ -88,16 +85,15 @@
                                                 {{ old("role", $user->role) === \App\Models\User::ROLE_KURIR ? "selected" : "" }}>
                                                 Kurir
                                             </option>
+                                            @if (Auth::user()->role !== \App\Models\User::ROLE_ADMIN)
+                                                <input type="hidden" name="role" value="{{ $user->role }}">
+                                            @endif
                                         </select>
                                         @error("role")
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 @endif
-                                @if (Auth::user()->role !== \App\Models\User::ROLE_ADMIN)
-                                    <input type="hidden" name="role" value="{{ $user->role }}">
-                                @endif
-
                                 <!-- Submit -->
                                 <button type="submit" class="btn btn-primary">
                                     Update Pengguna

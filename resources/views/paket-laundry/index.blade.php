@@ -11,7 +11,7 @@
         </div>
 
         <!-- Button Add New Package -->
-        @if (auth()->user()->role !== "pelanggan")
+        @if (auth()->user()->role === "admin")
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -90,7 +90,8 @@
                                                                     class="btn btn-warning btn-sm" title="Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
-                                                                <form action="{{ route("pesanan.destroy", $item->id) }}"
+                                                                <form
+                                                                    action="{{ route("paket-laundry.destroy", $item->id) }}"
                                                                     method="POST" class="delete-form d-inline">
                                                                     @csrf
                                                                     @method("DELETE")

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'role',
     ];
 
     /**
@@ -56,5 +57,8 @@ public function pesanan()
 {
     return $this->hasMany(Pesanan::class);
 }
-
+public function riwayat()
+{
+    return $this->hasMany(Riwayat::class);
+}
 }

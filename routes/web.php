@@ -62,6 +62,7 @@ Route::post('users', function (Illuminate\Http\Request $request) {
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:8',
+        'phone' => 'required|digits_between:10,15|unique:users,phone', // Nomor telepon valid & unik
         'role' => 'required|in:admin,staff,pelanggan,kurir',
     ]);
 
@@ -69,6 +70,7 @@ Route::post('users', function (Illuminate\Http\Request $request) {
         'name' => $validated['name'],
         'email' => $validated['email'],
         'password' => bcrypt($validated['password']),
+        'phone' => $validated['phone'],
         'role' => $validated['role'],
     ]);
 
@@ -86,13 +88,18 @@ Route::put('users/{user}', function (Illuminate\Http\Request $request, App\Model
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
         'password' => 'nullable|string|min:8',
-        'role' => 'required|in:admin,staff,pelanggan,kurir',
+        'phone' => 'nullable|digits_between:10,15|unique:users,phone,' . $user->id, 
+        'role' => 'nullable|in:admin,staff,pelanggan,kurir',  $user->role,
     ]);
-
+// Pastikan hanya admin yang dapat mengubah role
+if (Auth::user()->role !== \App\Models\User::ROLE_ADMIN) {
+    $validated['role'] = $user->role; // Gunakan role yang sudah ada
+}
     $user->update([
         'name' => $validated['name'],
         'email' => $validated['email'],
         'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
+        'phone' => $validated['phone'],
         'role' => $validated['role'],
     ]);
 
@@ -117,40 +124,68 @@ Route::delete('users/{user}', function (App\Models\User $user) {
     return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
 })->name('admin.users.destroy');
 
-
-Route::resource('paket-laundry', PaketLaundryController::class)->middleware(['auth',]);
-// routes/web.php
-Route::resource('pesanan', PesananController::class)->except(['index', 'show']);
-Route::middleware(['auth', 'role:staff,admin,kurir'])->group(function () {
-
-    Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
-    
-});
-
-// Allow all roles to view pesanan, with special rules for kurir
+Route::get('paket-laundry/create', [PaketLaundryController::class, 'create'])->name('paket-laundry.create');
 Route::middleware(['auth'])->group(function () {
-    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
-    Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    // Rute untuk semua pengguna yang telah login
+    Route::get('paket-laundry', [PaketLaundryController::class, 'index'])->name('paket-laundry.index');
+    Route::get('paket-laundry/{paket_laundry}', [PaketLaundryController::class, 'show'])->name('paket-laundry.show');
+
+    // Rute khusus untuk admin (akses penuh)
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+       
+        Route::post('paket-laundry', [PaketLaundryController::class, 'store'])->name('paket-laundry.store');
+        Route::get('paket-laundry/{paket_laundry}/edit', [PaketLaundryController::class, 'edit'])->name('paket-laundry.edit');
+        Route::put('paket-laundry/{paket_laundry}', [PaketLaundryController::class, 'update'])->name('paket-laundry.update');
+        Route::delete('paket-laundry/{paket_laundry}', [PaketLaundryController::class, 'destroy'])->name('paket-laundry.destroy');
+    });
+});
+// routes/web.php
+// Middleware untuk akses yang dibatasi pada staff, pelanggan, dan kurir
+Route::get('/pesanan/create', [PesananController::class, 'create'])->name('pesanan.create');
+Route::post('/pesanan', [PesananController::class, 'store'])->name('pesanan.store');
+Route::middleware(['auth'])->group(function () {
     
+    // Route utama untuk melihat semua pesanan
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
+    
+    // Melihat detail pesanan
+    Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+
+    // Hanya staff dan pelanggan yang bisa membuat pesanan baru
+  
+    // Mengupdate jumlah pesanan (staff hanya bisa melakukan ini)
+    Route::middleware(['role:staff'])->group(function () {
+        Route::patch('/pesanan/{id}/update-jumlah', [PesananController::class, 'updateJumlah'])->name('pesanan.update-jumlah');
+    });
+
+    // Konfirmasi pembayaran untuk kurir
+    Route::middleware(['role:kurir,staff,pelanggan'])->group(function () {
+        Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPaymentForm'])->name('pesanan.acc_payment');
+        Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');
+    });
+
+    // Mengupdate status pesanan hanya untuk staff, admin, dan kurir
+    Route::middleware(['role:staff,admin,kurir'])->group(function () {
+        Route::patch('/pesanan/{id}/update-status', [PesananController::class, 'updateStatus'])->name('pesanan.update-status');
+    });
+
+    // Cetak struk atau laporan PDF hanya untuk staff dan admin
+    Route::middleware(['role:staff,admin'])->group(function () {
+        Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');
+    });
+
+    // Menghapus pesanan
+    Route::middleware(['role:staff'])->group(function () {
+        Route::delete('/pesanan/{id}/destroy', [PesananController::class, 'destroy'])->name('pesanan.destroy');
+    });
+    
+    // Mengedit pesanan hanya untuk staff
+    Route::middleware(['role:staff'])->group(function () {
+        Route::get('/pesanan/{id}/edit', [PesananController::class, 'edit'])->name('pesanan.edit');
+        Route::put('/pesanan/{id}', [PesananController::class, 'update'])->name('pesanan.update');
+    });
+
 });
-
-// Route to show payment confirmation form
-Route::get('/pesanan/{id}/acc_payment', [PesananController::class, 'showAccPaymentForm'])->name('pesanan.acc_payment');
-
-// Route to process the payment and update status
-Route::post('/pesanan/{id}/acc_payment', [PesananController::class, 'accPayment'])->name('pesanan.process_payment');
-Route::get('/pesanan/{id}/cetak-pdf', [PesananController::class, 'cetakPdf'])->name('pesanan.cetak-pdf');
-Route::patch('/pesanan/{id}/update-jumlah', [PesananController::class, 'updateJumlah'])->name('pesanan.update-jumlah');
-
-
-// web.php (Route)
-// Kurir-specific routes
-Route::middleware(['role:kurir'])->prefix('kurir')->group(function () {
-    Route::get('/pesanan', [KurirController::class, 'index'])->name('kurir.pesanan.index');
-    Route::patch('/pesanan/{id}/status', [KurirController::class, 'updateStatus'])->name('kurir.pesanan.updateStatus');
-    Route::post('/pesanan/{id}/konfirmasi-bayar', [KurirController::class, 'konfirmasiBayar'])->name('kurir.pesanan.konfirmasiBayar');
-});
-
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/laporan-bulanan', [PesananController::class, 'laporanBulanan'])->name('laporan.bulanan');

@@ -442,6 +442,7 @@ public function laporanBulanan(Request $request)
     })->map(function ($items) {
         return [
             'user' => $items->first()->user->name ?? 'Unknown',
+            'id' => $items->first()->user->id ?? 'Id tidak diketahui',
             'pesanan_count' => $items->count(), // Hitung jumlah pesanan
             'subtotal' => $items->sum('total_harga'), // Hitung subtotal
             'pesanan' => $items->map(function ($item) {
@@ -450,6 +451,7 @@ public function laporanBulanan(Request $request)
                     'jumlah' => $item->jumlah,
                     'total_harga' => $item->total_harga,
                     'tanggal' => $item->created_at,
+                    'id' => $item->id
                 ];
             }),
         ];

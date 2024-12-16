@@ -246,25 +246,25 @@
                     <div class="col-lg-7 my-lg-5 pt-lg-5 pr-lg-5 m-0 pt-0">
                         <h6 class="text-secondary text-uppercase font-weight-medium mb-3">Fitur Kami</h6>
                         <h1 class="mb-4">Mengapa Memilih Kami</h1>
-                        <p>Kami memiliki pengalaman bertahun-tahun dalam memberikan layanan laundry berkualitas. Dengan
-                            staf yang ahli dan profesional, kami memastikan setiap pakaian yang Anda percayakan
+                        <p>Kami memiliki pengalaman bertahun-tahun dalam memberikan layanan laundry berkualitas. Kami
+                            memastikan setiap pakaian yang Anda percayakan
                             mendapatkan perlakuan terbaik. Kami berkomitmen untuk memberikan hasil yang memuaskan dan
                             pengiriman yang tepat waktu.</p>
                         <div class="row">
                             <div class="col-sm-6 mb-4">
-                                <h1 class="text-secondary" data-toggle="counter-up">10</h1>
+                                <h1 class="text-secondary" data-toggle="counter-up">3</h1>
                                 <h5 class="font-weight-bold">Tahun Pengalaman</h5>
                             </div>
                             <div class="col-sm-6 mb-4">
-                                <h1 class="text-secondary" data-toggle="counter-up">250</h1>
+                                <h1 class="text-secondary" data-toggle="counter-up">30</h1>
                                 <h5 class="font-weight-bold">Pekerja Ahli</h5>
                             </div>
                             <div class="col-sm-6 mb-4">
-                                <h1 class="text-secondary" data-toggle="counter-up">1250</h1>
+                                <h1 class="text-secondary" data-toggle="counter-up">1189</h1>
                                 <h5 class="font-weight-bold">Klien Puas</h5>
                             </div>
                             <div class="col-sm-6 mb-4">
-                                <h1 class="text-secondary" data-toggle="counter-up">9550</h1>
+                                <h1 class="text-secondary" data-toggle="counter-up">3278</h1>
                                 <h5 class="font-weight-bold">Pembersihan Kering</h5>
                             </div>
                         </div>
@@ -273,7 +273,7 @@
                         <div
                             class="d-flex flex-column align-items-center justify-content-center bg-secondary h-100 px-3 py-5">
                             <i class="fa fa-5x fa-certificate mb-5 text-white"></i>
-                            <h1 class="display-1 mb-3 text-white">10+</h1>
+                            <h1 class="display-1 mb-3 text-white">2+</h1>
                             <h1 class="m-0 text-white">Tahun Pengalaman</h1>
                         </div>
                     </div>

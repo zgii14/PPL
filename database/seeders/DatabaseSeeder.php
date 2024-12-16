@@ -42,9 +42,51 @@ class DatabaseSeeder extends Seeder
 
         // Seeder for customer user
         User::create([
-            'name' => 'Pelanggan',
-            'email' => 'pelanggan@example.com',
+            'name' => 'Diodo Arrahman',
+            'email' => 'diodo@example.com',
+            'password' => Hash::make('diodo123'),
+            'phone' => '089624712374',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Ferdy Fitriansyah Rowi',
+            'email' => 'ferdy@example.com',
+            'password' => Hash::make('ferdy123'),
+            'phone' => '089541322233',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Hanif Abdullah',
+            'email' => 'hanif@example.com',
+            'password' => Hash::make('hanif123'),
+            'phone' => '089518065971',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Ulfa stevi juliana',
+            'email' => 'ulfa@example.com',
+            'password' => Hash::make('ulfa123'),
+            'phone' => '082216395299',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Fiter ramadansyah',
+            'email' => 'fiter@example.com',
+            'password' => Hash::make('fiter123'),
+            'phone' => '081532538031',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Revan averuz',
+            'email' => 'revan@example.com',
             'password' => Hash::make('pelanggan123'),
+            'phone' => '08985682000',
+            'role' => 'pelanggan',
+        ]);
+        User::create([
+            'name' => 'Reyvano Pulunggono',
+            'email' => 'reyvano@example.com',
+            'password' => Hash::make('reyvano123'),
             'phone' => '08123426789',
             'role' => 'pelanggan',
         ]);

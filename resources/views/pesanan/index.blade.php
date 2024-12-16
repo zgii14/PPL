@@ -224,16 +224,28 @@
                                                                 <i class="fas fa-check"></i>
                                                             </a>
                                                         @endif
-                                                        @if (auth()->user()->role === "staff" || auth()->user()->role === "kurir")
+                                                        @if (auth()->user()->role === "kurir")
                                                             @if ($item->user->phone)
+                                                                @php
+                                                                    // Konversi nomor ke format internasional
+                                                                    $phone = preg_replace(
+                                                                        "/[^0-9]/",
+                                                                        "",
+                                                                        $item->user->phone,
+                                                                    );
+                                                                    if (substr($phone, 0, 2) === "08") {
+                                                                        $phone = "62" . substr($phone, 1);
+                                                                    }
+                                                                @endphp
+
                                                                 @if ($item->status == 5)
-                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin menginformasikan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _Proses Pengantaran_. Mohon ditunggu, kurir kami akan segera tiba di lokasi Anda. Terima kasih telah mempercayakan layanan laundry Anda kepada *Laundry Lubis*!") }}"
+                                                                    <a href="https://wa.me/{{ $phone }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin menginformasikan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _Proses Pengantaran_. Mohon ditunggu, kurir kami akan segera tiba di lokasi Anda. Terima kasih telah mempercayakan layanan laundry Anda kepada *Laundry Lubis*!") }}"
                                                                         target="_blank" class="btn btn-success btn-sm"
                                                                         title="Chat via WhatsApp">
                                                                         <i class="fab fa-whatsapp"></i>
                                                                     </a>
                                                                 @elseif ($item->status == 2)
-                                                                    <a href="https://wa.me/{{ preg_replace("/[^0-9]/", "", $item->user->phone) }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin memberitahukan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _proses penjemputan_. Kurir kami akan segera sampai di lokasi Anda. Terima kasih atas kepercayaan Anda kepada *Laundry Lubis*!") }}"
+                                                                    <a href="https://wa.me/{{ $phone }}?text={{ urlencode("Halo, " . $item->user->name . "! Kami dari *Laundry Lubis* ingin memberitahukan bahwa pesanan Anda dengan paket *" . $item->paket->nama_paket . "* saat ini sedang dalam _proses penjemputan_. Kurir kami akan segera sampai di lokasi Anda. Terima kasih atas kepercayaan Anda kepada *Laundry Lubis*!") }}"
                                                                         target="_blank" class="btn btn-success btn-sm"
                                                                         title="Chat via WhatsApp">
                                                                         <i class="fab fa-whatsapp"></i>

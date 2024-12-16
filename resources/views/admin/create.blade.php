@@ -37,6 +37,15 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label for="phone" class="form-label">Nomor HP</label>
+                                    <input type="text" name="phone" id="phone" class="form-control"
+                                        value="{{ old("phone") }}" placeholder="Contoh: 081234567890" required>
+                                    @error("phone")
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" name="password" id="password" class="form-control" required>
                                     @error("password")
@@ -51,7 +60,6 @@
                                         <option value="{{ \App\Models\User::ROLE_STAFF }}">Staff</option>
                                         <option value="{{ \App\Models\User::ROLE_PELANGGAN }}">Pelanggan</option>
                                         <option value="{{ \App\Models\User::ROLE_KURIR }}">Kurir</option>
-
                                     </select>
                                     @error("role")
                                         <div class="text-danger small">{{ $message }}</div>

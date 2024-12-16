@@ -3,10 +3,25 @@
 @section("content")
     <section class="section">
         <div class="section-header">
-            <h1>Daftar Pengguna</h1>
+            <!-- Judul Halaman -->
+            <h1>
+                @if (auth()->user()->role === "pelanggan")
+                    Profil Pengguna
+                @else
+                    Daftar Pengguna
+                @endif
+            </h1>
+
+            <!-- Breadcrumb -->
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item">Dashboard</div>
-                <div class="breadcrumb-item active">Pengguna</div>
+                <div class="breadcrumb-item active">
+                    @if (auth()->user()->role === "pelanggan")
+                        Profil Pengguna
+                    @else
+                        Pengguna
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -78,9 +93,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4>Tabel Pengguna</h4>
-                    </div>
+                    @if (auth()->user()->role !== "pelanggan")
+                        <div class="card-header">
+                            <h4>Tabel Pengguna</h4>
+                        </div>
+                    @endif
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table-striped table-hover table-bordered mb-0 table">
@@ -89,7 +106,11 @@
                                         <th class="text-center">ID</th>
                                         <th class="text-center">Nama</th>
                                         <th class="text-center">Email</th>
-                                        <th class="text-center">Role</th>
+                                        @if (auth()->user()->role === "pelanggan")
+                                            <th class="text-center">Status</th>
+                                        @else
+                                            <th class="text-center">Role</th>
+                                        @endif
                                         <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
